@@ -3,6 +3,7 @@
 <!--[if IE 9 ]><html class="ie9 no-js"> <![endif]-->
 <!--[if (gt IE 9)|!(IE)]><!--> <html class="no-js p-0" {% if settings.enable_rtl_mode %} dir="rtl"{% endif %} > <!--<![endif]-->
 <head>
+ {%- render 'layouthub_header' -%}
 
   <!-- Basic page needs ================================================== -->
   <meta charset="utf-8">
@@ -123,7 +124,7 @@ Add the page template as a class for easy page or template specific styling.
       {% include 'minicart' %}
       {% include 'menu_mobile' %}
       {% include 'popup-login' %}
-      {{ content_for_layout }}
+      <!--LayoutHub-Workspace-Start-->{{ content_for_layout }}<!--LayoutHub-Workspace-End-->
 
       {% section 'footer' %}
 
@@ -375,5 +376,6 @@ Add the page template as a class for easy page or template specific styling.
 
 
 
-</body>
+{%- render 'layouthub_footer' -%} 
+ </body>
 </html>
