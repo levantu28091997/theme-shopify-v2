@@ -1,0 +1,12 @@
+ {% if comment and comment.created_at %}
+  {%- assign number_of_comments = article.comments_count | plus: 1 -%}
+{% endif %} 
+
+<!-- BREADCRUMB -->
+
+<div class="bredcrumbWrap">
+	<div class="container"> {% include 'breadcrumb' %} </div>
+</div>
+<article class="container" itemscope itemtype="http://schema.org/Article"> 
+  {% section 'article-template' %} 
+</article>

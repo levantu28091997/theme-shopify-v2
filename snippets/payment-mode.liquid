@@ -1,0 +1,7 @@
+<div id="payment-methods"> 
+    {% if settings.payment_methods_display_visa? %} <img src="{{ 'icon-visa.png' | asset_url }}" alt="" /> {% endif %}
+	{% if settings.payment_methods_display_american-express? %}  <img src="{{ 'icon-express.png' | asset_url }}" alt="" /> {% endif %}
+	{% if settings.payment_methods_display_mastercard? %}  <img src="{{ 'icon-mastercard.png' | asset_url }}" alt="" />{% endif %}
+	{% if settings.payment_methods_display_discover? %}  <img src="{{ 'icon-discover.png' | asset_url }}" alt="" /> {% endif %}
+	{% if settings.payment_methods_display_paypal?%}  <img src="{{ 'icon-paypal.png' | asset_url }}" alt="" />{% endif %}
+</div>

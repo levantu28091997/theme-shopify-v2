@@ -1,0 +1,50 @@
+{% assign on_sale = false %}
+{% if product.compare_at_price > product.price %}
+  {% assign on_sale = true %}
+{% endif %}
+
+{% assign sold_out = true %} 
+{% if product.available %}
+  {% assign sold_out = false %}
+{% endif %}
+
+
+{% assign new_product = false %} 
+{% if product.tags contains 'new' %}
+  {% assign new_product = true %}
+{% endif %}
+<div class="list-view-item__image-column">
+	<div class="list-view-item__image-wrapper"> <img class="list-view-item__image" src="{{ product.featured_image.src | img_url: '600x600' }}" alt="{{ product.featured_image.alt | escape }}"> 
+      
+        {% if new_product and settings.show_labels %}
+		<label class="new">New</label>
+		{% endif %} 
+		
+		{% if on_sale or sold_out %}
+		<div class="right-tags"> 
+          {% if on_sale and settings.show_labels %}
+			<label class="on-sale">Sale</label>
+			{% endif %} 
+			
+			{% if sold_out %}
+			<label class="sold-out">Sold Out</label>
+			{% endif %} </div>
+		{% endif %} </div>
+</div>
+<div class="list-view-item__title-column">
+	<div class="h4 grid-view-item__title">{{ product.title }} </div>
+	<p class="product-review"> <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span> </p>
+	<p>{{ product.description | strip_html | truncatewords: 40 }}</p>
+	<p class="grid-view-item__meta">{% include 'product-price' %}</p>
+	{% assign variantCount = product.variants | size %}
+	<form class="variants" action="/cart/add" method="post">
+		{% if sold_out == false %}
+		{% if variantCount > 1 %}
+		<button class="btn btn-secondary" type="button" onclick="window.location.href='{{product.url}}'">Select options</button>
+		{% else %}
+		<input type="hidden" name="id" value="{{ product.variants.first.id }}" />
+		<button type="button" id="{{ product.variants[0].id }}" rel="1" class="btn btn-secondary add-to-cart">{{ 'products.product.add_to_cart' | t}}</button>
+		{% endif %}
+		{% endif %}
+	</form>
+</div>

@@ -1,0 +1,46 @@
+<div class="panel-group" id="accordion">
+{% for block in section.blocks limit: section.blocks.size%}
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h4 class="panel-title"><a  class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#{{ block.id }}">{{ block.settings.question}} </a></h4>
+		</div>
+		<div id="{{ block.id }}" class="panel-collapse collapse">
+			<div class="panel-body">{{ block.settings.answer}} </div>
+		</div>
+	</div>
+{% endfor %}
+</div>
+
+{% schema %}
+  {
+    "name": "FAQ Page",
+	"max_blocks":50,
+    "settings": [
+	  {
+        "type": "paragraph",
+       	"content":"Add more content on this page from pages => Faqs page"
+      }      
+	],
+   "blocks":[{
+	    "type":"faqs",
+		"name":"FAQs",
+		"settings":[			
+			{
+			"type":"text",
+			"id":"question",
+			"label":"Question"
+			},
+			{
+			"type":"textarea",
+			"id":"answer",
+			"label":"Answer"
+			}
+		 ]
+      }
+	]
+ }
+{% endschema %} 
+<script type="text/javascript">
+  $("#shopify-section-faq-template .panel-group .panel:first-child .collapse").addClass("in");
+  $("#shopify-section-faq-template .panel-group .panel:first-child .panel-title a").removeClass("collapsed");
+</script>

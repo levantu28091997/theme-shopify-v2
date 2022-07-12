@@ -1,0 +1,16 @@
+{% assign tags = settings.shop_by_filter5_tag_lists | split: ',' %}   
+<ul>
+	{% for filter5 in tags %}
+		{% assign tag = filter5 | strip %}
+		{% assign tag_value = tag | handleize %}
+		{% assign filter5tag = forloop.index | minus:1 %}
+		{% assign filter5tagid = 1 | times : filter5tag %}
+		
+		{% if collection.tags contains tag %}
+			<li>
+				<input type="checkbox" value="{{ tag_value }}" id="fl5-{{filter5tagid}}" {% if current_tags contains tag %}checked{% endif %} />
+				<label for="fl5-{{filter5tagid}}"><span><span></span></span>{{tag}}</label>
+  			</li>
+		{% endif %}
+	{% endfor %}
+</ul>

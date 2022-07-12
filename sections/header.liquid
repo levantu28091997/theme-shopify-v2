@@ -1,299 +1,312 @@
-<!-- /sections/header.liquid -->
-{% if template contains 'index' %}
-  {% if section.settings.select_hds == "header_v1" %}
-  {% include 'header-v1' %}
-  {% elsif section.settings.select_hds == "header_v2" %}
-  {% include 'header-v2' %}
-  {% elsif section.settings.select_hds == "header_v3" %}
-  {% include 'header-v3' %}
-  {% elsif section.settings.select_hds == "header_v4" %}
-  {% include 'header-v4' %}
-  {% elsif section.settings.select_hds == "header_v5" %}
-  {% include 'header-v5' %}
-  {% elsif section.settings.select_hds == "header_v6" %}
-  {% include 'header-v6' %}
-  {% endif %}
-{% else %}
-  {% if section.settings.select_hds_all == "header_ver1" %}
-  {% include 'header-v1' %}
-  {% elsif section.settings.select_hds_all == "header_ver2" %}
-  {% include 'header-v2' %}
-  {% elsif section.settings.select_hds_all == "header_ver3" %}
-  {% include 'header-v3' %}
-  {% elsif section.settings.select_hds_all == "header_ver4" %}
-  {% include 'header-v4' %}
-  {% elsif section.settings.select_hds_all == "header_ver5" %}
-  {% include 'header-v5' %}
-  {% elsif section.settings.select_hds_all == "header_ver6" %}
-  {% include 'header-v6' %}
-  {% endif %}
-{% endif %}
-
+<div data-section-id="{{ section.id }}" data-section-type="header-section"> {% if section.settings.message %}
+	<div class="notification-bar{% if section.settings.message_mobile == false %} mobilehide{% endif %}"> {% if section.settings.message %}
+		{% if section.settings.message_link != blank %} <a href="{{ section.settings.message_link }}" class="notification-bar__message"> {{ section.settings.message_text | escape }} </a> {% else %} <span class="notification-bar__message">{{ section.settings.message_text | escape }}</span> {% endif %} <span class="close-announcement">&times;</span> {% endif %} </div>
+	{% endif %}
+	<header class="site-header{% if section.settings.align_logo == 'left' %} border-bottom logo--left{% else %} logo--center{% endif %} hide large-up--show" role="banner"> 
+		
+        {% if section.settings.headertype == "header1" %}      
+      		{% include 'header1' %}	      
+		{% elsif section.settings.headertype == "header2"  %}       
+      		{% include 'header2' %}
+        {% elsif section.settings.headertype == "header3"  %}       
+      		{% include 'header3' %}
+        {% else %}  
+         	{% include 'header4' %}
+        {% endif %}
+      
+	</header>	
+    {% include 'header-responsive' %}  
+</div>
 {% schema %}
-{
-  "name": "Header",
-  "class": "index-section",
-  "settings": [
-    {
-      "type": "header",
-      "content": "Header Homepage"
-    },
-    {
-      "type": "select",
-      "id": "select_hds",
-      "label": "Select Style",
-      "options": [
-        {
-          "value": "header_v1",
-          "label": "Header v1"
-        },
-        {
-          "value": "header_v2",
-          "label": "Header v2"
-        },
-        {
-          "value": "header_v3",
-          "label": "Header v3"
-        },
-        {
-          "value": "header_v4",
-          "label": "Header v4"
-        },
-        {
-          "value": "header_v5",
-          "label": "Header v5"
-        },
-        {
-          "value": "header_v6",
-          "label": "Header v6"
-        }
-      ],
-      "default": "header_v1"
-    },
-    {
-      "type": "color",
-      "id": "hd_home_color_text",
-      "label": "Texts, Icons Color",
-      "default": "#fff"
-    },
-    {
-      "type": "checkbox",
-      "id": "hd_home_enable_transparents",
-      "label": "Enable Transparent",
-      "default": true
-    },
-    {
-      "type": "color",
-      "id": "hd_home_bg_header_normal",
-      "label": "Background Color"
-    },
-    {
-      "type": "range",
-      "id": "hd_bg_header_opacity",
-      "min": 0.1,
-      "max": 1,
-      "step": 0.1,
-      "label": "Opacity Background",
-      "default": 1
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_sticky_hd_home",
-      "label": "Enable Sticky",
-      "default": true
-    },
-    {
-      "type": "image_picker",
-      "id": "hd_home_logo",
-      "label": "Logo Image",
-      "info": "140 x 46px .png recommended"
-    },
-    {
-      "type": "range",
-      "id": "hd_home_logo_maxwidth",
-      "min": 35,
-      "max": 300,
-      "step": 5,
-      "unit": "px",
-      "label": "Logo Display Width",
-      "default": 140
-    },
-    {
-      "type": "textarea",
-      "id": "hd_home_logo_svg",
-      "label": "Logo Svg"
-    },
-    {
-      "type": "header",
-      "content": "Header Other Pages"
-    },
-    {
-      "type": "select",
-      "id": "select_hds_all",
-      "label": "Select Style",
-      "options": [
-        {
-          "value": "header_ver1",
-          "label": "Header v1"
-        },
-        {
-          "value": "header_ver2",
-          "label": "Header v2"
-        },
-        {
-          "value": "header_ver3",
-          "label": "Header v3"
-        },
-        {
-          "value": "header_ver4",
-          "label": "Header v4"
-        },
-        {
-          "value": "header_ver5",
-          "label": "Header v5"
-        },
-        {
-          "value": "header_ver6",
-          "label": "Header v6"
-        }
-      ],
-      "default": "header_ver1"
-    },
-    {
-      "type": "color",
-      "id": "hd_other_color_text",
-      "label": "Texts, Icons Color",
-      "default": "#fff"
-    },
-    {
-      "type": "checkbox",
-      "id": "hd_other_enable_transparents",
-      "label": "Enable Transparents",
-      "default": true
-    },
-    {
-      "type": "color",
-      "id": "hd_other_bg_header_normal",
-      "label": "Background Color"
-    },
-    {
-      "type": "range",
-      "id": "hd_other_bg_header_opacity",
-      "min": 0.1,
-      "max": 1,
-      "step": 0.1,
-      "label": "Opacity Background",
-      "default": 1
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_sticky_hd_other",
-      "label": "Enable Sticky",
-      "default": true
-    },
-    {
-      "type": "image_picker",
-      "id": "hd_other_logo",
-      "label": "Logo Image",
-      "info": "140 x 46px .png recommended"
-    },
-    {
-      "type": "range",
-      "id": "hd_other_logo_maxwidth",
-      "min": 35,
-      "max": 300,
-      "step": 5,
-      "unit": "px",
-      "label": "Logo Display Width",
-      "default": 140
-    },
-    {
-      "type": "textarea",
-      "id": "hd_other_logo_svg",
-      "label": "Logo Svg"
-    },
-    {
-      "type": "header",
-      "content": "Select Menu"
-    },
-    {
-      "type": "link_list",
-      "id": "main_menu_store",
-      "label": "Main Menu"
-    },
-	{
-      "type": "header",
-      "content": "Icon Header"
-    },
-	{
-        "type": "header",
-        "content": "Icon search"
+  {
+    "name": "Header",
+    "settings": [
+	  {
+            "type": "select",
+            "id": "headertype",
+            "label": "Select Header",
+			"default": "header1",
+            "options": [
+              {
+                "value": "header1",
+                "label": "Header 1"
+              },
+              {
+                "value": "header2",
+                 "label": "Header 2"
+              },
+              {
+                "value": "header3",
+                "label": "Header 3"
+              },
+              {
+                "value": "header4",
+                "label": "Header 4"
+              }			  
+            ]
+      },     
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo image",		
+        "info": "Recommended Size: 160 x 80px .png"
+      },
+	{ 
+		"type":"header",
+		"content":"Top Announcement"
+	},
+	 {
+        "type": "checkbox",
+        "id": "message",
+        "label": "Display",
+        "default": true
+      },
+	 {
+        "type": "checkbox",
+        "id": "message_mobile",
+        "label": "Display in mobile",
+        "default": false
       },
       {
         "type": "text",
-        "id": "hd_icon_search",
-        "label": "Icon search",
-        "info": "[Get icon from here](https:\/\/fontawesome.com\/v4.7.0\/icons\/)",
-        "default": "fa fa-search"
-      },
-      {
-        "type": "textarea",
-        "id": "hd_icon_search_svg",
-        "label": "Icon search SVG"
-      },
-      {
-        "type": "header",
-        "content": "Icon Wishlist"
-      },
-      {
-        "type": "text",
-        "id": "hd_icon_wishlist",
-        "label": "Icon Wishlist",
-        "info": "[Get icon from here](https:\/\/fontawesome.com\/v4.7.0\/icons\/)",
-        "default": "icon-heart"
-      },
-      {
-        "type": "textarea",
-        "id": "hd_icon_wishlist_svg",
-        "label": "Icon wishlist SVG"
+        "id": "message_text",
+        "label": "Announcement text",
+        "default": "Announce something here"
       },
       {
         "type": "url",
-        "id": "url_wishlist",
-        "label": "Url Wishlist"
+        "id": "message_link",
+        "label": "Announcement link",
+        "info": "Optional"
+      },
+      {
+        "type": "color",
+        "id": "color_bg",
+        "label": "Announcement color",
+        "default": "#eee"
+      },
+      {
+        "type": "color",
+        "id": "color_text",
+        "label": "Announcement text color",
+        "default": "#000"
+      },
+	  {
+        "type": "header",
+        "content": "Top Header"        
+      },
+	 {
+        "type": "color",
+        "id": "top_header_bg_clr",
+        "label": "Top Header Background Color",
+        "default": "#fff"
+      },
+		{
+        "type": "color",
+        "id": "top_header_text_clr",
+        "label": "Top Header Text Color",
+        "default": "#444"
+      },
+	 {
+        "type": "color",
+        "id": "header_border_clr",
+        "label": "Top Header Border Color",
+        "default": "#ddd"
+      },
+	  {
+        "type": "color",
+        "id": "top_icon_colr",
+        "label": "Icon color",
+        "default": "#1b1b1b"
       },
       {
         "type": "header",
-        "content": "Icon login"
+        "content": "Use for Header 3 and Header 4"        
       },
-      {
-        "type": "text",
-        "id": "hd_icon_login",
-        "label": "Icon login",
-        "info": "[Get icon from here](https:\/\/fontawesome.com\/v4.7.0\/icons\/)",
-        "default": "icon-icon-user"
+     {
+        "type": "color",
+        "id": "cart_count_bg_clr",
+        "label": "Cart Count Background",
+        "default": "#df7a7b"        
       },
-      {
+     {
+        "type": "color",
+        "id": "cart_count_text_clr",
+        "label": "Cart Count Text",
+        "default": "#fff"
+      },     
+ 	  {
         "type": "textarea",
-        "id": "hd_icon_login_svg",
-        "label": "Icon login SVG"
+        "id": "top_header_left_text",
+        "label": "Top Left Text ",
+        "default": "Call Us (1800) 000 8888"
       },
-      {
+ 	  {
         "type": "header",
-        "content": "Icon cart"
+        "content": "Main Header"        
       },
       {
-        "type": "text",
-        "id": "hd_icon_cart",
-        "label": "Icon cart",
-        "info": "[Get icon from here](https:\/\/fontawesome.com\/v4.7.0\/icons\/)",
-        "default": "icon-icon-cart"
+        "type": "color",
+        "id": "main_header_colr",
+        "label": "Main Header Color",
+        "default": "#fff"
       },
       {
+        "type": "color",
+        "id": "shiping_icon_colr",
+        "label": "Shipping Icon Color",
+        "default": "#000"
+      },
+	  {
         "type": "textarea",
-        "id": "hd_icon_cart_svg",
-        "label": "Icon cart SVG"
+        "id": "free_shipping_text",
+        "label": "Free Shipping Text",
+        "default": "Free Shipping on all orders"
+      },
+	  {
+        "type": "header",
+        "content": "Use for Header 1 and Header 2"        
+      },
+	   {
+        "type": "color",
+        "id": "cart_bag_color",
+        "label": "Cart Bag Color",
+        "default": "#fff"
+      },
+ 	  {
+        "type": "color",
+        "id": "cart_bag_bg_color",
+        "label": "Cart Bag Background Color",
+        "default": "#000"
+      },
+ 	  {
+        "type": "color",
+        "id": "cart_price_color",
+        "label": "Cart Bag Price Color",
+        "default": "#db1f18"
+      },
+	  {
+        "type": "header",
+        "content": "Use for Header 3 and Header 4"        
+      },
+	   {
+        "type": "color",
+        "id": "search_bg_clr",
+        "label": "Search Box Background",
+        "default": "#eee"
+      },
+     {
+        "type": "color",
+        "id": "search_btm_bdr_clr",
+        "label": "Search Box Bottom Border",
+        "default": "#eee"
+      },
+     {
+        "type": "color",
+        "id": "search_icn_clr",
+        "label": "Search Icon",
+        "default": "#666"
+      },
+     {
+        "type": "color",
+        "id": "search_text_clr",
+        "label": "Search Box Text",
+        "default": "#666"
       }
-  ]
-}
+    ]
+  }
 {% endschema %}
+
+<style>
+  {% if section.settings.message %}   
+   	 .notification-bar { background-color: {{ section.settings.color_bg }};}
+   	 .notification-bar__message, .close-announcement { color: {{ section.settings.color_text }}; }
+  	  .close-announcement { border:1px solid {{ section.settings.color_text }}; }   
+  {% endif %}
+  
+  .top-header { border-bottom:1px solid {{ section.settings.header_border_clr }}; 
+  background:{{ section.settings.top_header_bg_clr }}; 
+  }  
+  
+  .customer-links li { border-left:1px solid {{ section.settings.header_border_clr }};} 
+  .top-header .site-cart { border-left:1px solid {{ section.settings.header_border_clr }}; border-right:1px solid {{ section.settings.header_border_clr }};}
+  .top-header .site-cart .fa { color: {{ section.settings.top_icon_colr}}; }
+  
+  
+  .site-header__search .search { border-right:1px solid {{ section.settings.header_border_clr }};
+    border-left:1px solid {{ section.settings.header_border_clr }}; }
+    
+  .btnSearch { border:0; }
+  
+  .currency-picker { border-right:1px solid {{ section.settings.header_border_clr }}; border-left:1px solid {{ section.settings.header_border_clr }};}
+  
+  .top-header .fa { color: {{ section.settings.top_icon_colr}};}
+  
+  a.site-header__cart { background:{{ section.settings.cart_bag_bg_color}}; }
+  a.site-header__cart .fa { color: {{ section.settings.cart_bag_color}};  }
+  .site-header__cart-count { background:{{ section.settings.cart_price_color}}; color:#fff; }  
+  
+  .top-header .site-header__cart-count { background:{{ section.settings.cart_count_bg_clr}}; color:{{ section.settings.cart_count_text_clr}}; }  
+ 
+  .main-header { background:{{ section.settings.main_header_colr}}; }
+  .main-header .icon {  color: {{ section.settings.shiping_icon_colr}}; }
+  
+  .top-header a,
+  .site-header__search .search-header__input,
+  .call-us p,
+  .top-header.header-3 .site-header__cart, .top-header.header-4 .site-header__cart,
+  .top-header .currency-picker { color: {{ section.settings.top_header_text_clr}}; }
+  .top-header .currency-picker option { color:#444; }
+  
+  .top-header a:hover {  color: {{ section.settings.top_header_text_clr}}; opacity:0.9; }
+  
+  .search-header__input::-webkit-input-placeholder { /* Chrome */
+   color: {{ section.settings.top_header_text_clr}} !important;
+  }
+  .search-header__input:-ms-input-placeholder { /* IE 10+ */
+   color: {{ section.settings.top_header_text_clr}} !important;
+  }
+  .search-header__input::-moz-placeholder { /* Firefox 19+ */
+   color: {{ section.settings.top_header_text_clr}} !important;
+    opacity: 1;
+  }
+  .search-header__input:-moz-placeholder { /* Firefox 4 - 18 */
+   color: {{ section.settings.top_header_text_clr}} !important;
+    opacity: 1;
+  }
+  
+  
+  .top-header .currency-picker { background-color:transparent; }
+  
+  .main-header.header-3 .site-header__search ,
+  .main-header.header-4 .site-header__search { background: {{ section.settings.search_bg_clr}}; border-bottom:1px solid {{ section.settings.search_btm_bdr_clr}};  
+  }
+  
+  .main-header.header-3 .site-header__search .search__input,
+  .main-header.header-4 .site-header__search .search__input { color:{{ section.settings.search_text_clr}}; }
+  
+  .main-header.header-3 .site-header__search .search__input::-webkit-input-placeholder,
+  .main-header.header-4 .site-header__search .search__input::-webkit-input-placeholder{ /* Chrome */
+   color: {{ section.settings.search_text_clr}} !important;
+  }
+   .main-header.header-3 .site-header__search .search__input::-ms-input-placeholder,
+   .main-header.header-4 .site-header__search .search__input::-ms-input-placeholder,{ /* IE 10+ */
+   color: {{ section.settings.search_text_clr}} !important;
+  }
+  .main-header.header-3 .site-header__search .search__input::-moz-placeholder,
+  .main-header.header-4 .site-header__search .search__input::-moz-placeholder{ /* Firefox 19+ */
+   color: {{ section.settings.search_text_clr}} !important;
+    opacity: 1;
+  }
+  .main-header.header-3 .site-header__search .search__input::-moz-placeholder,
+  .main-header.header-4 .site-header__search .search__input::-moz-placeholder{ /* Firefox 4 - 18 */
+   color: {{ section.settings.search_text_clr}} !important;
+    opacity: 1;
+  }
+  
+  
+  .main-header.header-3 .fa-search,
+  .main-header.header-3 .fa-search { color:{{ section.settings.search_icn_clr}}; }
+  
+  
+</style>

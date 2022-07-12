@@ -1,0 +1,33 @@
+{% case block.settings.mmcolumns %}
+    {% when '2' %}
+      {%- assign column = 'large-up--one-half' -%}
+	{% when '3' %}
+      {%- assign column = 'large-up--one-third' -%}
+    {% when '4' %}
+      {%- assign column = 'large-up--one-quarter' -%}
+    {% when '5' %}
+      {%- assign column = 'large-up--one-fifth' -%}
+    {% when '6' %}
+      {%- assign column = 'large-up--one-sixth' -%}
+{% endcase %}
+
+{%- assign child_list_handle = link.title | handleize -%}
+
+{% if linklists[child_list_handle].links != blank %}
+	<li class="grid__item lvl-1 {{ column }} {% if link.active %} active{% endif %}">
+		<a href="{{ link.url }}" class="site-nav lvl-1">
+          	{{ link.title }} <span class="visually-hidden">{{ 'layout.navigation.expand' | t }}</span>
+  		</a>
+    	<ul class="subLinks">
+			{% for childlink in linklists[child_list_handle].links %}
+			<li class="lvl-2 {% if childlink.active %}active{% endif %}">
+				<a href="{{ childlink.url }}" class="site-nav lvl-2">{{ childlink.title | escape }}</a>
+			</li>
+      		{% endfor %}
+    	</ul>
+	</li>
+{% else %}
+	<li class="grid__item lvl-1 {{ column }} {% if link.active %} active{% endif %}">
+  		<a href="{{ link.url }}" class="site-nav lvl-1">{{ link.title }}</a>
+	</li>
+{% endif %}

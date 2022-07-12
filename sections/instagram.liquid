@@ -1,0 +1,140 @@
+<div class="container wow fadeInUp" data-section-id="{{ section.id }}" data-section-type="instagram" data-get="{{ section.settings.instagram_get}}" data-image="{{ section.settings.images_size }}"
+   data-count="{{ section.settings.limit }}" data-tags="{{ section.settings.instagram_tag }}" data-user="{{ section.settings.user-id }}" data-token="{{ section.settings.accessToken }}">
+  <section class="home-instagram wow fadeIn">   
+      <div class="widget-title text-center">   
+          {% if section.settings.instagram_title != blank %}
+              <h3>{{ section.settings.instagram_title }}</h3>
+          {% endif %}        
+
+          {% if section.settings.instagram_des != blank %}
+              <p class="instagram-des">{{ section.settings.instagram_des }}</p>
+          {% endif %} 
+        
+          {% if section.settings.display_instagram_button %}
+          {% if section.settings.instagram_button_text != blank %}
+          <p class="text-center">
+            <a href="{{ section.settings.instagram_button_link }}" title="{{ section.settings.instagram_button_text }}" target="_blank" class="btn btn--small">
+              {{ section.settings.instagram_button_text }}              
+           </a>
+          </p>
+          {% endif %}
+          {% endif %}
+      </div>
+      <div id="instafeed" class="im{{ section.settings.images_size }}"></div>
+  </section>
+</div>
+
+{% schema %}
+  {
+    "name": "Instagram",
+    "class":"index-section",
+    "settings": [
+     {
+        "type": "color",
+        "id": "instagram_bg_color",
+        "label": "Background color",
+        "default": "#000"
+      },
+      {
+        "type": "text",
+        "id": "instagram_title",
+        "label": "Title",
+        "default": "Famiza On Instagram"
+      },
+      {
+        "type": "text",
+        "id": "instagram_des",
+        "label": "Instagram Description",
+        "default": "Phasellus lorem malesuada ligula pulvinar commodo maecenas suscipit auctom."
+      },
+      {
+        "type": "checkbox",
+        "id": "display_instagram_button",
+        "label": "Display Button Instagram?",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "instagram_button_text",
+        "label": "Button Instagram Text",
+        "default": "View Gallery"
+      },
+      {
+        "type": "text",
+        "id": "instagram_button_link",
+        "label": "Button Instagram Link"
+      },
+      {
+        "type": "select",
+        "id": "instagram_get",
+        "label": "Get Image from",
+        "options": [
+          {
+            "value": "tagged",
+            "label": "Tagged"
+          },
+          {
+            "value": "user",
+            "label": "User"
+          }
+        ],
+        "default": "tagged"
+      },
+      {
+        "type": "text",
+        "id": "instagram_tag",
+        "label": "Tag Name",
+        "info": "Use when Get Image from: 'Tagged'.",
+ 		"default": "shopify"
+      },
+      {
+        "type": "text",
+        "id": "user-id",
+        "label": "User Id",
+        "default": "5362056112",
+        "info": "Use when Get Image from: 'User'. [Where do I find User ID and Access Token?](http:\/\/www.pinceladasdaweb.com.br\/instagram\/access-token\/)"
+      },
+      {
+        "type": "text",
+        "id": "accessToken",
+        "label": "Access Token",
+        "default": "5362056112.ba4c844.3960df2b3fc54f239207c6cd9bc84cb8",
+        "info": "Required to use when Get Image from: 'User'."
+      },
+      {
+        "type": "text",
+        "id": "limit",
+        "label": "Limit the number of images to show",
+        "default": "16"
+      },
+      {
+        "type": "select",
+        "id": "images_size",
+        "label": "Resolution of images",
+        "options": [
+          {
+            "value": "thumbnail",
+            "label": "Thumbnail"
+          },
+          {
+            "value": "low_resolution",
+            "label": "Low Resolution"
+          },
+          {
+            "value": "standard_resolution",
+            "label": "Standard Resolution"
+          }
+        ]
+      }      
+    ],   
+    "presets": [
+      {
+        "name": "Instagram",
+        "category": "Image"       
+      }
+    ]
+  }
+{% endschema %}
+<style>
+  .home-instagram .widget-title { background:{{ section.settings.instagram_bg_color}}; }
+</style>

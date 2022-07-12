@@ -1,0 +1,93 @@
+<div class="container wow fadeInUp" id="{{ section.id }}" data-products="{{ section.settings.grid }}" data-section-id="{{ section.id }}" data-section-type="carousel-section"> 
+     {% if section.settings.title != blank %}
+	<div class="section-header text-center">
+		<h2><span>{{ section.settings.title | escape }}</span></h2>
+	</div>
+	{% endif %} 
+	
+	{% case section.settings.grid %}
+	{% when '3' %}                   
+	{%- assign image_size = '455x' -%}
+	{% when '4' %}                   
+	{%- assign image_size = '370x' -%}
+	{% when '5' %}                  
+	{%- assign image_size = '295x' -%}          		
+	{% endcase %}
+		
+   {% if section.settings.collection != blank %}					
+      <div class="grid-products product-carousel">         		
+        <div  class="grid--view-items productSlider">
+          {% for product in collections[section.settings.collection].products limit:section.settings.rows %}
+          <div class="item"> {% include 'product-card-grid', grid_image_width: image_size %} </div>
+          {% endfor %}
+        </div>
+      </div>		
+  {% else %}
+  <p class="text-center">Please select collection from store admin</p>
+  {% endif %} 
+  
+</div>
+
+{% schema %}
+  {
+    "name": "Featured Product Carousel",
+    "class": "index-section",  
+    "settings": [
+      {
+        "type": "text",
+        "id": "title",
+        "label": "Heading",
+        "default": "Our Products"
+      },
+      {
+          "id": "collection",
+          "type": "collection",
+          "label": "Select Collection"
+      },  
+	  {
+        "type": "select",
+        "id": "grid",
+        "label": "Products per row",
+        "default": "4",
+        "options": [        
+        {
+        "value": "3",
+        "label": "3"
+        },
+        {
+        "value": "4",
+        "label": "4"
+        },
+        {
+        "value": "5",
+        "label": "5"
+        }       
+       ]
+      },
+      {
+        "type": "text",
+        "id": "rows",
+        "label": "Number of Product to show",
+        "default": "8"
+      },
+	  {
+          "type": "checkbox",
+          "id": "show_vendor",
+          "label": "Show product vendors",
+          "default": false
+       },
+ 	  {
+          "type": "checkbox",
+          "id": "show_product_review",
+          "label": "Show product reviews",
+          "default": false
+       }      
+	 ],	
+    "presets": [
+      {
+        "name": "Featured Product Carousel",
+        "category": "Product"              
+      }
+    ]
+  }
+{% endschema %} 

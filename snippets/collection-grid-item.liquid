@@ -1,0 +1,49 @@
+
+{% if block.settings.collection_image != blank %}
+   {% capture collection_image_url %}
+      {{ block.settings.collection_image | img_url: collection_image_size }} 
+   {% endcapture %}
+{% elsif collection.products.first %}
+  {% capture collection_image_url %}
+      {{ collection.products.first | img_url: collection_image_size, crop: 'top' }}
+  {% endcapture %}
+{% endif %}
+
+
+<div class="collection-grid-item">
+  <a href="{% if collection.empty? %}#{% else %}{{ collection.url }}{% endif %}" class="collection-grid-item__link">
+    <div class="collection-grid-item__overlay">          
+      {% if collection.empty? %}
+        {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+        {{ 'collection-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+      {% else %}
+      	 <img src="{{ collection_image_url }}" alt="" />
+      {% endif %}
+    </div>
+    <div class="collection-grid-item__title-wrapper">
+     {% unless section.settings.hide_button %}
+      <a href="{% if collection.empty? %}#{% else %}{{ collection.url }}{% endif %}" title=" Shop Now" class="btn">
+    {{ section.settings.button_text }} <i class="fa fa-caret-right" aria-hidden="true"></i>
+      </a>
+       {% endunless %}
+      {% unless section.settings.hide_text %}
+      <h3 class="collection-grid-item__title">
+        {% if collection.empty? %}
+        	{% if block.settings.collection_name != blank %}
+        		{{ block.settings.collection_name }}
+            {% else %}        
+          		 {{ 'homepage.onboarding.collection_title' | t }}     
+            {% endif %}                  	
+        {% else %}   
+        	{% if block.settings.collection_name != blank %}
+        		{{ block.settings.collection_name }}
+            {% else %}        
+          		{{ collection.title }}
+            {% endif %}        
+        {% endif %}
+      </h3>
+      {% endunless %}
+      
+    </div>
+  </a>
+</div>

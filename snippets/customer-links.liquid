@@ -1,0 +1,15 @@
+{% if shop.customer_accounts_enabled %}
+<ul class="customer-links">	
+	{% if customer %}
+	<li><a href="/account/logout"> <i class="fa fa-key" aria-hidden="true"></i>  {{ 'customer.account.logout' | t }}</a> </li>
+    <li><a href="/account"> <i class="fa fa-user" aria-hidden="true"></i> {{ 'customer.account.title' | t }}</a> </li>
+	{% else %}		
+	<li><a href="/account/login"><i class="fa fa-sign-in" aria-hidden="true"></i> {{ 'customer.login.title' | t }}</a></li>
+	<li>
+      	{% if shop.customer_accounts_optional %} 
+      	<a href="/account/register"> <i class="fa fa-key" aria-hidden="true"></i> {{ 'customer.register.title' | t }}</a>
+		{% endif %}
+  	</li>
+	{% endif %}
+</ul>
+{% endif %}

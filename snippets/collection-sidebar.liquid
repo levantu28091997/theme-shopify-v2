@@ -1,9 +1,68 @@
-<div style="overflow: hidden" class=" engoj-collection-sidebar engoc_sw_filter_tag">
-  {% for i in (1..7) %}
-  {% capture collection_widget %}collection_widget_{{i}}{% endcapture %}
-  {% if settings[collection_widget] != blank %}
-  {% include settings[collection_widget] %}
-  {% endif %}
-  {% endfor %}
+<!-- Categories -->
+{% if settings.display_categories %}
+	{% include 'collection-sidebar-categories' %}
+{% endif %}
+
+
+<!-- Product Filters -->
+{% if settings.display_filter_1 or settings.display_filter_2 or settings.display_filter_3 or settings.display_filter_4 %}
+<div class="sidebar_widget filters">
+    <div class="closeFilter hidden-sm hidden-md hidden-lg"><i class="fa fa-times" aria-hidden="true"></i></div>
+  	<div class="widget-title"><h3>Product Filters</h3></div>
+    <div class="widget-content">  
+      <div class="sidebar_tags">
+        {% if settings.display_filter_1 %}
+        <h4>{{  settings.filter_1_label }}</h4>
+           {% include 'collection-sidebar-shop-by-filter-1' %} 
+        {% endif %}
+
+        {% if settings.display_filter_2 %}
+        <h4> {{  settings.filter_2_label }}</h4>
+           {% include 'collection-sidebar-shop-by-filter-2' %}
+        {% endif %}
+
+        {% if settings.display_filter_3 %}
+        <h4> {{  settings.filter_3_label }}</h4>
+           {% include 'collection-sidebar-shop-by-filter-3' %}
+        {% endif %}
+
+        {% if settings.display_filter_4 %}
+        <h4>{{  settings.filter_4_label }}</h4>
+           {% include 'collection-sidebar-shop-by-filter-4' %}
+        {% endif %}  
+        
+        
+        {% if settings.display_filter_5 %}
+        <h4>{{  settings.filter_5_label }}</h4>
+           {% include 'collection-sidebar-shop-by-filter-5' %}
+        {% endif %}
+        
+         {% if settings.display_filter_6 %}
+        <h4>{{  settings.filter_6_label }}</h4>
+           {% include 'collection-sidebar-shop-by-filter-6' %}
+        {% endif %}
+        
+      </div>
+  </div>  
 </div>
-<!-- #secondary -->
+{% endif %}
+
+<!-- Featured Product Carousel-->
+{% if settings.display_sidebar_products_carosel %}
+	{% include 'collection-sidebar-featured-products' %}
+{% endif %}
+
+<!-- Static Block Banner-->
+{% if settings.display_static_banner_block %}
+	{% include 'collection-sidebar-static-banner-block' %}
+{% endif %}
+
+<!-- CMS Block-->
+{% if settings.display_static_text_block %}
+	{% include 'collection-sidebar-static-text-block' %}
+{% endif %}
+
+<!-- All Product Tags -->
+{% if settings.display_product_tags %}
+	{% include 'collection-sidebar-product-tags' %}
+{% endif %}

@@ -1,0 +1,54 @@
+<!-- Top header -->
+		<div class="top-header">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-6 col-md-4 pull-left"> {% if settings.show_multiple_currencies %}
+						{% include 'currency-picker' %}
+						{% endif %}
+						
+						{% if section.settings.top_header_left_text != blank%}
+						<div class="call-us">
+							<p>{{ section.settings.top_header_left_text }} </p>
+						</div>
+						{% endif %} 
+                  </div>
+					<div class="col-sm-6 col-md-8 pull-right">
+						<div class="site-header__search hidden-xs hidden-sm"> {% include 'search-form' %} </div>
+						{% include 'customer-links' %} 
+                    </div>
+				</div>
+			</div>
+		</div>
+		
+		<!-- Main header -->
+      <div class="main-header">
+		<div class="container">
+			<div class="row-table"> 
+				<div class="col-sm-5 col-md-4 text-left logo-col"> 
+                    {% comment %}
+					Use the uploaded logo from theme settings if enabled.
+					Site name gets precedence with H1 tag on homepage, div on other pages.
+					{% endcomment %}
+                  
+					{% if template == 'index' %}
+					<div class="h2 site-header__logo" itemscope itemtype="http://schema.org/Organization"> {% else %}
+						<div class="h2 site-header__logo" itemscope itemtype="http://schema.org/Organization"> {% endif %}
+							{% if section.settings.logo %} <a href="/" itemprop="url" class="site-header__logo-image"> <img src="{{ section.settings.logo | img_url: 'master' }}" alt="{{ section.settings.logo.alt | default: shop.name }}"
+                   itemprop="logo"> </a> {% else %} <a class="site-header__logo-link" href="/" itemprop="url">{{ shop.name }}</a> {% endif %}
+							{% if template == 'index' %} 
+                       </div>
+						{% else %} 
+                    </div>
+					{% endif %} 
+                </div>              
+
+                {% if section.settings.free_shipping_text != blank %}
+                <div class="col-sm-5 col-md-7 text-right">
+                  <p class="freeShiping"> {% include 'icon-shipping' %} <span>{{ section.settings.free_shipping_text }}</span> </p>
+                </div>
+                {% endif %}	
+              
+				<div class="col-sm-2 col-md-1  cart-col"> {% include 'mini-cart' %} </div>
+			</div>
+		</div>
+      </div>

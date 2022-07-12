@@ -1,0 +1,183 @@
+<div class="product-template__container" id="ProductSection-product-template" data-section-id="{{ section.id }}" data-section-type="product" itemscope itemtype="http://schema.org/Product">
+ 
+  {%- assign current_variant = product.selected_or_first_available_variant -%}
+  {%- assign product_thumb_size = '400x' -%}
+  {%- assign product_image_width = 'medium-up--one-half' -%}
+  {%- assign product_description_width = 'medium-up--one-half' -%}
+
+  <div class="grid product-single">
+    <div class="grid__item product-single__photos {{ product_image_width }}{% if section.settings.image_size == 'full' %} product-single__photos--full{% endif %}">
+
+      {%- assign featured_img_src = current_variant.featured_image.src | default: product.featured_image.src -%}
+      {%- assign featured_img_alt = current_variant.featured_image.alt | default: product.featured_image.alt -%}
+   		<div id="FeaturedImageZoom-{{ section.id }}" class="product-single__photo{% if product.images.size > 1 %} product-single__photo--has-thumbnails{% endif %} hide" {% if enable_zoom %}data-zoom="{{ featured_img_src | img_url: product_image_zoom_size }}"{% endif %}>
+            <img src="{{ featured_img_src | img_url: product_image_size }}" alt="{{ featured_img_alt }}" id="FeaturedImage-{{ section.id }}" class="product-featured-img{% if enable_zoom %} js-zoom-enabled{% endif %}">
+          </div>
+        <!-- PRODUCT THUMBS -->
+          <div class="product-photos">
+            <ul class="grid product-photoslider">
+              {% for image in product.images %}
+                <li class="grid__item item">
+                  <a href="{{ image.src | img_url: product_image_size }}"
+                      class="text-link product-single__thumbnail product-single__thumbnail--{{ section.id }}"
+                      {% if enable_zoom %}data-zoom="{{ image.src | img_url: product_image_zoom_size }}"{% endif %}>
+                      <img class="product-single__thumbnail-image" src="{{ image.src | img_url: product_thumb_size }}" alt="{{ image.alt | escape }}">
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+    </div>
+
+    <div class="grid__item {{ product_description_width }}">
+      <div class="product-single__meta">
+
+        <h1 itemprop="name" class="product-single__title">{{ product.title }}</h1>
+        
+        <!-- PRICE-->
+        <meta itemprop="priceCurrency" content="{{ shop.currency }}">        
+        <p class="product-single__price product-single__price-{{ section.id }}{% unless current_variant.available %} product-price--sold-out{% endunless %}">
+          {% if current_variant.compare_at_price > current_variant.price %}
+          <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span>
+          <s id="ComparePrice-{{ section.id }}">{{ current_variant.compare_at_price | money }}</s>
+          <span class="product-price__price product-price__price-{{ section.id }} product-price__sale product-price__sale--single">
+            <span id="ProductPrice-{{ section.id }}">{{ current_variant.price | money }}</span>            
+          </span>
+          {% else %}
+          <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span>
+          <s id="ComparePrice-{{ section.id }}" class="hide">{{ current_variant.compare_at_price | money }}</s>
+          <span class="product-price__price product-price__price-{{ section.id }}">
+            <span id="ProductPrice-{{ section.id }}">{{ current_variant.price | money }}</span>
+            <span class="product-price__sale-label product-price__sale-label-{{ section.id }} hide">{{ 'products.product.on_sale' | t }}</span>
+          </span>
+          {% endif %}
+        </p>
+        
+        <!-- AVAILABILITY , TYPE,	SKU -->
+        <div class="product-info">
+           {% if settings.show_product_availability %}
+          <p class="product-stock" itemprop="availability">Availability :	{% if product.available %}<span class="instock">In Stock </span> {% else %} <span  class="outstock">Out Of Stock</span>{% endif %}	 </p> 
+          {% endif %}   
+
+           {% if settings.show_product_type %}
+          <p class="product-type">Product Type : <span>{{ product.type }}</span></p> 
+          {% endif %}   
+
+           {% if settings.show_product_vendor %}
+          <p class="product-type">Vendor : <span>{{ product.vendor }}</span></p> 
+           {% endif %}   
+
+           {% if settings.show_product_sku %}
+          <p class="product-sku">SKU: <span>{{ product.variants.first.sku }}</span></p>
+           {% endif %}   
+        </div>
+        
+        <!-- PRODUCT SHORT DESCRIPTION -->
+        {% if settings.show_short_desc %}
+        <div class="product-single__description rte" itemprop="description">
+          {% assign meta = product.metafields.meta %}
+            {% assign key = 'short_des' %}
+            {% if meta.short_des != blank %}
+              {{ meta.short_des }}
+            {% elsif product.empty? %}
+            	{{ 'homepage.onboarding.product_description' | t }}
+          	{% else %}
+          		{{ product.description | strip_html | truncatewords: 30 }}
+            {% endif %}
+         </div>
+         {% endif %}
+          <hr/>
+
+          <form action="/cart/add" method="post" enctype="multipart/form-data" class="product-form product-form-{{ section.id }} {% if settings.show_variant_swatches %}hidedropdown{% endif %}" data-section="{{ section.id }}">
+                {% unless product.options.size == 1 and product.variants[0].title == 'Default Title' %}
+                  {% for option in product.options_with_values %}
+                    <div class="selector-wrapper js product-form__item">
+                      <label {% if option.name == 'default' %}class="label--hidden" {% endif %}for="SingleOptionSelector-{{ forloop.index0 }}">
+                        {{ option.name }}
+                      </label>
+                      <select class="single-option-selector single-option-selector-{{ section.id }} product-form__input selectbox" id="SingleOptionSelector-{{ forloop.index0 }}" data-index="option{{ forloop.index }}">
+                        {% for value in option.values %}
+                          <option value="{{ value | escape }}"{% if option.selected_value == value %} selected="selected"{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  {% endfor %}
+                {% endunless %}
+
+                <select name="id" id="ProductSelect-{{ section.id }}" data-section="{{ section.id }}" class="product-form__variants selectbox no-js">
+                  {% for variant in product.variants %}
+                    {% if variant.available %}
+                      <option {% if variant == product.selected_or_first_available_variant %} selected="selected" {% endif %} value="{{ variant.id }}">
+                        {{ variant.title }}
+                      </option>
+                    {% else %}
+                      <option disabled="disabled">{{ variant.title }} - {{ 'products.product.sold_out' | t }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+            
+            	<!-- Product Swatch -->
+               {% if settings.show_variant_swatches %}
+                  {% if product.available and product.variants.size > 1 %}
+                    {% for option in product.options %}
+                      {% include 'swatch' with option %}
+                    {% endfor %}
+                  {% endif %}
+                {% endif %}       
+            
+           <div class="product-action">
+              <div class="product-form__item product-form__item--quantity">
+                <label for="Quantity" class="hidden">{{ 'products.product.quantity' | t }}</label>              
+                <div class="wrapQtyBtn">
+                  <div class="qtyField">
+                    <a class="qtyBtn minus" href="javascript:void(0);">{% include 'icon-minus' %}</a>
+                    <input type="text" id="Quantity" name="quantity" value="1" class="product-form__input qty" />
+                    <a class="qtyBtn plus" href="javascript:void(0);">{% include 'icon-plus' %}</a>
+                  </div>
+                </div>
+                <script>
+                  $(".qtyBtn").on("click", function() {
+                    var oldValue = jQuery("#Quantity").val(),
+                        newVal = 1;                     
+
+                    if ($(this).is(".plus")) {
+                      newVal = parseInt(oldValue) + 1;
+                    } else if (oldValue > 1) {
+                      newVal = parseInt(oldValue) - 1;
+                    }
+
+                    $("#Quantity").val(newVal);
+                  });
+                </script>
+              </div>
+            <div class="product-form__item product-form__item--submit">
+              <button type="submit" name="add" id="AddToCart-{{ section.id }}" {% unless current_variant.available %}disabled="disabled"{% endunless %} class="btn product-form__cart-submit{% if product.options.size == 1 and product.variants[0].title == 'Default Title' %} product-form__cart-submit--small{% endif %}">
+                <span id="AddToCartText-{{ section.id }}">
+                  {% unless current_variant.available %}
+                    {{ 'products.product.sold_out' | t }}
+                  {% else %}
+                    {{ 'products.product.add_to_cart' | t }}
+                  {% endunless %}
+                </span>
+              </button>
+            </div>
+            </div>
+          </form>
+        
+        <hr/>
+        <div class="display-table">
+         <div class="display-table-cell">{% include 'wishlist' %}</div>
+        </div>      
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--[if (gt IE 9)|!(IE)]><!--><script src="{{ 'quickview.js' | asset_url }}" defer="defer"></script><!--<![endif]-->
+<!--[if lte IE 9]><script src="{{ 'quickview.js' | asset_url }}"></script><![endif]-->
+
+{% unless product.empty? %}
+  <script type="application/json" id="ProductJson-{{ section.id }}">
+    {{ product | json }}
+  </script>
+{% endunless %}

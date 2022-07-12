@@ -1,141 +1,351 @@
-<!-- /sections/footer.liquid -->
-{% if template contains 'index' %}
-  {% if section.settings.select_fts == "footer_v1" %}
-  {% include 'footer-v1' %}
-  {% elsif section.settings.select_fts == "footer_v2" %}
-  {% include 'footer-v2' %}
-  {% elsif section.settings.select_fts == "footer_v3" %}
-  {% include 'footer-v3' %}
-  {% elsif section.settings.select_fts == "footer_v4" %}
-  {% include 'footer-v4' %}
-  {% elsif section.settings.select_fts == "footer_v5" %}
-  {% include 'footer-v5' %}
-  {% elsif section.settings.select_fts == "footer_v6" %}
-  {% include 'footer-v6' %}
-  {% elsif section.settings.select_fts == "footer_none" %}
-  {% endif %}
+<footer class="site-footer wow fadeInUp" role="contentinfo">
+ 
+   <!-- Newsletter -->
+    {% if section.settings.footer_newsletter_enable %}        
+    <div class="newsletter">
+          <div class="container">             
+            <div class="row">
+              <div class="col-md-6">
+              	  <div class="newsletter-title">
+                    {% if section.settings.footer_newsletter_title != blank %}
+                    <h3>{{ section.settings.footer_newsletter_title }}</h3>
+                    {% endif %}
 
+                    {% if section.settings.footer_newsletter_sub_title != blank %}
+                    <p>{{ section.settings.footer_newsletter_sub_title }}</p>
+                    {% endif %} 
+                  </div>              
+               </div> 
+              <div class="col-md-6">              	       
+                <div class="newsletter-field"> 
+                  {% include 'newsletter-form' %}                         
+                </div>              
+              </div>
+            </div>         
+        </div>
+    </div>      
+    {% endif %}  
   
-{% else %}
-  {% if section.settings.select_fts_all == "footer_ver1" %}
-  {% include 'footer-v1' %}
-  {% elsif section.settings.select_fts_all == "footer_ver2" %}
-  {% include 'footer-v2' %}
-  {% elsif section.settings.select_fts_all == "footer_ver3" %}
-  {% include 'footer-v3' %}
-  {% elsif section.settings.select_fts_all == "footer_ver4" %}
-  {% include 'footer-v4' %}
-  {% elsif section.settings.select_fts_all == "footer_ver5" %}
-  {% include 'footer-v5' %}
-  {% elsif section.settings.select_fts_all == "footer_ver6" %}
-  {% include 'footer-v6' %}
-  {% endif %}
+  <div class="container wow fadeInUp">        
+    <!-- Footer Top -->
+    <div class="footer-top">
+		 <div class="row">
+           {% if section.settings.column1_title != blank %}
+           <div class="col-sm-3 footer-links">
+             <h3>{{ section.settings.column1_title }}</h3>
+             <ul>
+               {% assign footerCol1 = section.settings.column_1_menu | handleize %}
+               {% for link in linklists[footerCol1].links %}
+               <li>{{ link.title | link_to: link.url }}</li>
+               {% else %}
+               Please Create links from navigation and select menu from customization > secttion > footer 
+               {% endfor %}
+             </ul>
+           </div>
+           {% endif %}
 
-{% endif %}
+           {% if section.settings.column2_title != blank %}
+           <div class="col-sm-3 footer-links">
+             <h3>{{ section.settings.column2_title }}</h3>
+             <ul>
+               {% assign footerCol2 = section.settings.column_2_menu | handleize %}
+               {% for link in linklists[footerCol2].links %}
+               <li>{{ link.title | link_to: link.url }}</li>
+               {% else %}
+               Please Create links from navigation and select menu from customization > secttion > footer 
+               {% endfor %}
+             </ul>
+           </div>
+           {% endif %}
+
+           {% if section.settings.column3_title != blank %}
+           <div class="col-sm-3 footer-links">
+             <h3>{{ section.settings.column3_title }}</h3>
+             <ul>
+               {% assign footerCol3 = section.settings.column_3_menu | handleize %}
+               {% for link in linklists[footerCol3].links %}
+               <li>{{ link.title | link_to: link.url }}</li>
+               {% else %}
+               Please Create links from navigation and select menu from customization > secttion > footer 
+               {% endfor %}
+             </ul>
+           </div>
+           {% endif %}
+
+           <div class="col-sm-3 contact-box last">
+             {% if section.settings.display_address_footer %}
+               <h3>{{ section.settings.column4_title }}</h3>						
+               <ul class="addressFooter">
+                 <li>
+                   <i class="fa fa-map-marker"></i>
+                   <p>{{section.settings.address}}</p>
+                 </li>
+                 <li class="phone">
+                   <i class="fa fa-phone"></i>
+                   <p>{{ section.settings.phone }}</p>
+                 </li>
+                 <li class="email">
+                   <i class="fa fa-envelope"></i>
+                   <p>{{ section.settings.email }}</p>
+                 </li>
+               </ul>
+             {% endif %}
+             
+             {% if section.settings.show_social_media %}                          
+             	{% if section.settings.social_media_group_title != blank %}
+             		<h3> {{section.settings.social_media_group_title }} </h3>
+             	{% endif %}
+             	{% include 'social-media' %} 
+             {% endif %}
+           </div>
+		</div>
+    </div>
+    
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      {% if section.settings.copyright_text %}
+      <div class="row">
+        <div class="col-md-6">
+          {{ section.settings.copyright_text }}
+          {% if section.settings.show_design_by %}
+          <br/>Designed by <a href="http://adornthemes.com/" target="_blank">AdornThemes.com</a>.
+          {% endif %}
+        </div>
+        {% if section.settings.show_payment_icons %}
+        <div class="col-md-6 text-right"> 
+          {% include 'payment-mode' %} 
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>    
+  </div>
+</footer>
 
 {% schema %}
-{
-  "name": "Footer",
-  "class": "index-section",
-  "settings": [
-    {
-      "type": "header",
-      "content": "Footer Homepage"
-    },
-    {
-      "type": "select",
-      "id": "select_fts",
-      "label": "Select Style",
-      "options": [
-        {
-          "value": "footer_v1",
-          "label": "Footer v1"
-        },
-        {
-          "value": "footer_v2",
-          "label": "Footer v2"
-        },
-        {
-          "value": "footer_v3",
-          "label": "Footer v3"
-        },
-        {
-          "value": "footer_v4",
-          "label": "Footer v4"
-        },
-        {
-          "value": "footer_v5",
-          "label": "Footer v5"
-        },
-        {
-          "value": "footer_v6",
-          "label": "Footer v6"
-        },
-        {
-          "value": "footer_none",
-          "label": "No Footer"
-        }
-      ],
-      "default": "footer_v1"
-    },
-    {
-      "type": "color",
-      "id": "ft_home_bg_footer",
-      "label": "Background Color"
-    },
-    {
-      "type": "color",
-      "id": "ft_home_color_text",
-      "label": "Texts, Icons Color",
-      "default": "#fff"
-    },
-    {
-      "type": "header",
-      "content": "Footer OtherPages"
-    },
-    {
-      "type": "select",
-      "id": "select_fts_all",
-      "label": "Select Footer Style for All page (unless Homepage)",
-      "options": [
-        {
-          "value": "footer_ver1",
-          "label": "Footer v1"
-        },
-        {
-          "value": "footer_ver2",
-          "label": "Footer v2"
-        },
-        {
-          "value": "footer_ver3",
-          "label": "Footer v3"
-        },
-        {
-          "value": "footer_ver4",
-          "label": "Footer v4"
-        },
-        {
-          "value": "footer_ver5",
-          "label": "Footer v5"
-        },
-        {
-          "value": "footer_ver6",
-          "label": "Footer v6"
-        }
-      ],
-      "default": "footer_ver1"
-    },
-    {
-      "type": "color",
-      "id": "ft_other_bg_footer",
-      "label": "Background Color"
-    },
-    {
-      "type": "color",
-      "id": "ft_other_color_text",
-      "label": "Texts, Icons Color",
-      "default": "#fff"
-    }
-  ]
-}
+  {
+    "name": "Footer",
+    "settings": [
+      {
+        "type": "color",
+        "id": "scroll_top_arrow_clr",
+        "label": "Scroll To Top Arrow Color",
+        "default": "#131212"
+      },
+	 {
+		"type":"header",
+		"content":"Newsletter"
+	 },
+	 {
+        "type": "checkbox",
+        "id": "footer_newsletter_enable",
+        "label": "Display newsletter signup?",
+        "default": true
+      },
+      {
+        "type": "color",
+        "id": "newsletter_background_clr",
+        "label": "Newsletter Background Color",
+        "default": "#eee"
+      },
+      {
+        "type": "color",
+        "id": "newsletter_text_clr",
+        "label": "Newsletter Text Color",
+        "default": "#000"
+      },
+      {
+        "type": "color",
+        "id": "newsletter_button_clr",
+        "label": "Newsletter Button Color",
+        "default": "#000"
+      },
+      {
+        "type": "color",
+        "id": "newsletter_button_hover_clr",
+        "label": "Newsletter Button Hover Color",
+        "default": "#404040"
+      },
+      {
+        "type": "text",
+        "id": "footer_newsletter_title",
+        "label": "Section Title",
+        "default": "Newsletter Sign Up"
+      },
+      {
+        "type": "textarea",
+        "id": "footer_newsletter_sub_title",
+        "label": "Section Sub Title",
+        "default": "Get weekly updates about our latest shop and special offers"
+      },
+	  {
+ 		"type":"header",
+		"content":"Footer"
+	  },
+	  {
+       "type":"color",
+  	   "id":"footer_bg_clr",
+ 	   "label":"Background Color",
+	   "default":"#131212"		
+	 },
+	 {
+       "type":"color",
+  	   "id":"footer_text_clr",
+ 	   "label":"Text Color",
+	   "default":"#b0aeae"		
+	 },
+	 {
+       "type":"color",
+  	   "id":"footer_title_clr",
+ 	   "label":"Title Text Color",
+	   "default":"#fff"		
+	 },
+	{
+       "type":"color",
+  	   "id":"footer_border_clr",
+ 	   "label":"Border Color",
+	   "default":"#6f6e6e"		
+	 },
+	 {
+		"type": "text",
+        "id": "column1_title",
+		"label": "Column 1 Title",
+		"default": "Quick Shop"
+	 },     
+      {
+        "type": "link_list",
+        "id": "column_1_menu",
+        "label": "Column 1 Menu",
+        "default": "main-menu",
+	    "info":"create navigation from online store=> navigation"
+      },
+       {
+		"type": "text",
+        "id": "column2_title",
+		"label": "Column 2 Title",
+		"default": "Information"
+	 },     
+      {
+        "type": "link_list",
+        "id": "column_2_menu",
+        "label": "Column 2 Menu",
+        "default": "main-menu",
+	    "info":"create navigation from online store=> navigation"
+      },
+     {
+		"type": "text",
+        "id": "column3_title",
+		"label": "Column 3 Title",
+		"default": "Customer Services"
+	 },     
+      {
+        "type": "link_list",
+        "id": "column_3_menu",
+        "label": "Column 3 Menu",
+        "default": "main-menu",
+	    "info":"create navigation from online store=> navigation"
+      },		
+      {
+		"type": "text",
+        "id": "column4_title",
+		"label": "Column 4 Title",
+		"default": "Contact Us"
+	  }, 
+	  {
+		"type":"header",
+		 "content":"Address"
+	  },
+	  {
+        "type": "checkbox",
+        "id": "display_address_footer",
+        "label": "Display?",
+        "default": true
+     },
+     {
+        "type": "color",
+        "id": "icon_colors",
+        "label": "Address Icon Colors",
+        "default": "#fff"
+      },
+	  {
+        "type": "textarea",
+        "id": "address",
+        "label": "Address",
+        "default": "55 Gallaxy Enque, 2568 steet, 23568 NY"
+      },
+      {
+        "type": "text",
+        "id": "phone",
+        "label": "Phone Number",
+        "default": "+202-555-0186"
+      },
+      {
+        "type": "text",
+        "id": "email",
+        "label": "Email Address",
+        "default": "sales@yousite.com"
+      },     
+     {
+        "type": "checkbox",
+        "id": "show_social_media",
+        "label": "Display Social Media",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "social_media_group_title",
+        "label": "Social Media Group Title",
+        "default": "Stay Connected to have suceess"
+      },
+	  {
+        "type": "color",
+        "id": "social_icon_clr",
+        "label": "Social Icon Color",
+        "default": "#fff"
+      },
+	  {
+        "type": "textarea",
+        "id": "copyright_text",
+        "label": "Copyright Text",
+        "default": "© 2017,TrendyWears. All Rights Reserved. Ecommerce Software by Shopify."
+      },
+      {
+        "type": "checkbox",
+        "id": "show_payment_icons",
+        "label": "Show payment icons?",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_design_by",
+        "label": "Show Designed By",
+        "default": true
+      }     
+    ]
+  }
 {% endschema %}
+
+<style> 
+  #site-scroll { background:{{ section.settings.scroll_top_arrow_clr}};  }
+  .site-footer { background-color:{{ section.settings.footer_bg_clr}}; }
+  
+  .newsletter { background:{{ section.settings.newsletter_background_clr}}; }
+  .newsletter-title h3,
+  .newsletter-title p { color:{{ section.settings.newsletter_text_clr}};  }
+  
+  #Subscribe { background:{{ section.settings.newsletter_button_clr}}; border:0; }
+  #Subscribe:hover { background:{{ section.settings.newsletter_button_hover_clr}}; color:#fff; }
+  
+  .footer-top { border-bottom:1px dotted {{section.settings.footer_border_clr}};  }
+  .footer-links { border-color:{{section.settings.footer_border_clr}};}
+  .footer-top,
+  .footer-links a,
+  .footer-top p,
+  .footer-bottom { color:{{ section.settings.footer_text_clr}}; }
+  .footer-bottom a { color:{{ section.settings.footer_title_clr}}; }
+  
+  .footer-top h3 { color:{{ section.settings.footer_title_clr}}; }
+  
+  .addressFooter .fa { color:{{ section.settings.icon_colors}}; }
+  .footer-top ul.social li a { color:{{ section.settings.social_icon_clr}}; }
+</style>

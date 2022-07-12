@@ -1,0 +1,29 @@
+<ul class="social">
+	{% if settings.social_facebook_link != blank %}
+	<li> <a target="_blank" class="social-icons__link" href="{{ settings.social_facebook_link }}" title="{{ 'layout.footer.social_platform' | t: name: shop.name, platform: 'Facebook' }}"> <i class="fa fa-facebook"></i> <span class="icon__fallback-text">Facebook</span> </a> </li>
+	{% endif %}
+	
+    {% if settings.social_twitter_link != blank %}
+	<li> <a target="_blank" class="social-icons__link" href="{{ settings.social_twitter_link }}" title="{{ 'layout.footer.social_platform' | t: name: shop.name, platform: 'Twitter' }}"> <i class="fa fa-twitter"></i> <span class="icon__fallback-text">Twitter</span> </a> </li>
+	{% endif %}
+	
+  {% if settings.social_pinterest_link != blank %}
+	<li> <a target="_blank" class="social-icons__link" href="{{ settings.social_pinterest_link }}" title="{{ 'layout.footer.social_platform' | t: name: shop.name, platform: 'Pinterest' }}"> <i class="fa fa-pinterest-p"></i> <span class="icon__fallback-text">Pinterest</span> </a> </li>
+	{% endif %}
+	
+  {% if settings.social_instagram_link != blank %}
+	<li> <a target="_blank" class="social-icons__link" href="{{ settings.social_instagram_link }}" title="{{ 'layout.footer.social_platform' | t: name: shop.name, platform: 'Instagram' }}"> <i class="fa fa-instagram"></i> <span class="icon__fallback-text">Instagram</span> </a> </li>
+	{% endif %}
+	
+  {% if settings.social_tumblr_link != blank %}
+	<li> <a target="_blank" class="social-icons__link" href="{{ settings.social_tumblr_link }}" title="{{ 'layout.footer.social_platform' | t: name: shop.name, platform: 'Tumblr' }}"> <i class="fa fa-tumblr"></i> <span class="icon__fallback-text">Tumblr</span> </a> </li>
+	{% endif %}           
+	
+   {% if settings.social_youtube_link != blank %}
+	<li> <a target="_blank" class="social-icons__link" href="{{ settings.social_youtube_link }}" title="{{ 'layout.footer.social_platform' | t: name: shop.name, platform: 'YouTube' }}"> <i class="fa fa-youtube"></i> <span class="icon__fallback-text">YouTube</span> </a> </li>
+	{% endif %}
+	
+  {% if settings.social_vimeo_link != blank %}
+	<li> <a target="_blank" class="social-icons__link" href="{{ settings.social_vimeo_link }}" title="{{ 'layout.footer.social_platform' | t: name: shop.name, platform: 'Vimeo' }}"> <i class="fa fa-vimeo"></i> <span class="icon__fallback-text">Vimeo</span> </a> </li>
+	{% endif %}
+</ul>

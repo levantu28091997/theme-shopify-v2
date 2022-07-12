@@ -1,0 +1,30 @@
+<div class="pagination">
+	<div class="row">
+		<div class="col-sm-6 left">
+			<p class="pagination-num-showing">Showing: {{ paginate.current_offset | plus: 1 }}-{% if paginate.next %}{{ paginate.current_offset | plus: paginate.page_size }}{% else %}{{ paginate.items }}{% endif %} of {{ paginate.items }}</p>
+		</div>
+		<div class="col-sm-6 right">
+			<ul>
+				{% if paginate.previous %}
+				<li class="prev">{{ '<i class="fa fa-angle-double-left" aria-hidden="true"></i>' | link_to: paginate.previous.url }}</li>
+				{% endif %}
+				
+				{% for part in paginate.parts %}
+				{% if part.is_link %}
+				<li>{{ part.title | link_to: part.url }}</li>
+				{% else %}
+				{% if part.title == '&hellip;' %}
+				<li class="ellipsis disabled"><a href="#" onclick="return false;">{{ part.title }}</a></li>
+				{% else %}
+				<li class="active">{{ part.title | link_to: part.url }}</li>
+				{% endif %}
+				{% endif %}
+				{% endfor %}     
+				
+				{% if paginate.next %}
+				<li class="next">{{ '<i class="fa fa-angle-double-right" aria-hidden="true"></i>' | link_to: paginate.next.url }}</li>
+				{% endif %}
+			</ul>
+		</div>
+	</div>
+</div>

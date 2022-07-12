@@ -1,576 +1,790 @@
-(function($) {
-  function showPopup(selector) {
-    $(selector).addClass('active');
-  } window.showPopup=showPopup;
+window.theme = window.theme || {};
 
-  function hidePopup(selector) {
-    $(selector).removeClass('active');
-  }
+/* ================ SLATE ================ */
+window.theme = window.theme || {};
 
-  function qtyProduct() {  
-    $('.qtyplus').click(function(e){
-      var fieldName = $(this).attr('data-field');
-      var currentVal = parseInt($('input[name='+fieldName+']').val());
+theme.Sections = function Sections() {
+  this.constructors = {};
+  this.instances = [];
 
-      if (!isNaN(currentVal)) {
-        $('input[name='+fieldName+']').val(currentVal + 1);
-      } else {
-        $('input[name='+fieldName+']').val(1);
-      }
-      e.preventDefault();
-    });
+  $(document)
+    .on('shopify:section:load', this._onSectionLoad.bind(this))
+    .on('shopify:section:unload', this._onSectionUnload.bind(this))
+    .on('shopify:section:select', this._onSelect.bind(this))
+    .on('shopify:section:deselect', this._onDeselect.bind(this))
+    .on('shopify:block:select', this._onBlockSelect.bind(this))
+    .on('shopify:block:deselect', this._onBlockDeselect.bind(this));
+};
 
-    $(".qtyminus").click(function(e) {
+theme.Sections.prototype = _.assignIn({}, theme.Sections.prototype, {
+  _createInstance: function(container, constructor) {
+    var $container = $(container);
+    var id = $container.attr('data-section-id');
+    var type = $container.attr('data-section-type');
 
-      var fieldName = $(this).attr('data-field');
-      var currentVal = parseInt($('input[name='+fieldName+']').val());
-      if (!isNaN(currentVal) && currentVal > 1) {
-        $('input[name='+fieldName+']').val(currentVal - 1);    }
-      else {
-        $('input[name='+fieldName+']').val(1);
-      }
-      e.preventDefault();
-    });
-  }
-  window.qtyProduct=qtyProduct;
+    constructor = constructor || this.constructors[type];
 
-  function doAjaxAddToCart(variant_id, quantity, title, image) {
-
-    $.ajax({
-      type: "post",
-      url: "/cart/add.js",
-      data: 'quantity=' + quantity + '&id=' + variant_id,
-      dataType: 'json',
-      beforeSend: function() {
-        showPopup('.loading');
-      },
-      success: function(msg) {
-
-
-        $('.tshopify-popup').removeClass('active');
-        hidePopup('.quickview-product');
-        Shopify.getCart(function(cart) {
-          tbuildCart(cart);
-        });
-      },
-      error: function(xhr, text) {
-        hidePopup('.loading');
-        $('.error-message').text($.parseJSON(xhr.responseText).description);
-        showPopup('.error-popup');
-      }
-    });
-  }window.doAjaxAddToCart=doAjaxAddToCart;
-
-  function tbuildCart(cart) {
-    // Start with a fresh cart div
-    var $cartContainer = $('.enj-minicart-ajax');
-    $cartContainer.empty();
-
-    // Show empty cart
-    if (cart.item_count === 0) {
-      $cartContainer
-      .append('<p>' + "Your cart is currently empty." + '</p>');
-      cartCallback(cart);
+    if (_.isUndefined(constructor)) {
       return;
-      $('.js-number-cart').removeClass('active');
     }
 
-    // Handlebars.js cart layout
-    var items = [],
-        item = {},
-        data = {},
-        source = $("#CartTemplate").html(),
-        template = Handlebars.compile(source);
+    var instance = _.assignIn(new constructor(container), {
+      id: id,
+      type: type,
+      container: container
+    });
 
-    // Add each item to our handlebars.js data
-    $.each(cart.items, function(index, cartItem) {
+    this.instances.push(instance);
+  },
 
-      /* Hack to get product image thumbnail
-       *   - If image is not null
-       *     - Remove file extension, add _small, and re-add extension
-       *     - Create server relative link
-       *   - A hard-coded url of no-image
-      */
-      if (cartItem.image != null){
-        var prodImg = cartItem.image.replace(/(\.[^.]*)$/, "_small$1").replace('http:', '');
-      } else {
-        var prodImg = "//cdn.shopify.com/s/assets/admin/no-image-medium-cc9732cb976dd349a0df1d39816fbcc7.gif";
+  _onSectionLoad: function(evt) {
+    var container = $('[data-section-id]', evt.target)[0];
+    if (container) {
+      this._createInstance(container);
+    }
+  },
+
+  _onSectionUnload: function(evt) {
+    this.instances = _.filter(this.instances, function(instance) {
+      var isEventInstance = (instance.id === evt.detail.sectionId);
+
+      if (isEventInstance) {
+        if (_.isFunction(instance.onUnload)) {
+          instance.onUnload(evt);
+        }
       }
 
-      // Create item's data object and add to 'items' array
-      item = {
-        id: cartItem.variant_id,
-        line: index + 1, // Shopify uses a 1+ index in the API
-        url: cartItem.url,
-        img: prodImg,
-        name: cartItem.product_title,
-        variation: cartItem.variant_title,
-        properties: cartItem.properties,
-        itemAdd: cartItem.quantity + 1,
-        itemMinus: cartItem.quantity - 1,
-        itemQty: cartItem.quantity,
-        price: Shopify.formatMoney(cartItem.price, ajaxCartConfig.moneyFormat),
-        vendor: cartItem.vendor
+      return !isEventInstance;
+    });
+  },
+
+  _onSelect: function(evt) {
+    // eslint-disable-next-line no-shadow
+    var instance = _.find(this.instances, function(instance) {
+      return instance.id === evt.detail.sectionId;
+    });
+
+    if (!_.isUndefined(instance) && _.isFunction(instance.onSelect)) {
+      instance.onSelect(evt);
+    }
+  },
+
+  _onDeselect: function(evt) {
+    // eslint-disable-next-line no-shadow
+    var instance = _.find(this.instances, function(instance) {
+      return instance.id === evt.detail.sectionId;
+    });
+
+    if (!_.isUndefined(instance) && _.isFunction(instance.onDeselect)) {
+      instance.onDeselect(evt);
+    }
+  },
+
+  _onBlockSelect: function(evt) {
+    // eslint-disable-next-line no-shadow
+    var instance = _.find(this.instances, function(instance) {
+      return instance.id === evt.detail.sectionId;
+    });
+
+    if (!_.isUndefined(instance) && _.isFunction(instance.onBlockSelect)) {
+      instance.onBlockSelect(evt);
+    }
+  },
+
+  _onBlockDeselect: function(evt) {
+    // eslint-disable-next-line no-shadow
+    var instance = _.find(this.instances, function(instance) {
+      return instance.id === evt.detail.sectionId;
+    });
+
+    if (!_.isUndefined(instance) && _.isFunction(instance.onBlockDeselect)) {
+      instance.onBlockDeselect(evt);
+    }
+  },
+
+  register: function(type, constructor) {
+    this.constructors[type] = constructor;
+
+    $('[data-section-type=' + type + ']').each(function(index, container) {
+      this._createInstance(container, constructor);
+    }.bind(this));
+  }
+});
+
+window.slate = window.slate || {};
+
+/**
+ * iFrames
+ * -----------------------------------------------------------------------------
+ * Wrap videos in div to force responsive layout.
+ *
+ * @namespace iframes
+ */
+
+slate.rte = {
+  wrapTable: function() {
+    $('.rte table').wrap('<div class="rte__table-wrapper"></div>');
+  },
+
+  iframeReset: function() {
+    var $iframeVideo = $('.rte iframe[src*="youtube.com/embed"], .rte iframe[src*="player.vimeo"]');
+    var $iframeReset = $iframeVideo.add('.rte iframe#admin_bar_iframe');
+
+    $iframeVideo.each(function() {
+      // Add wrapper to make video responsive
+      $(this).wrap('<div class="video-wrapper"></div>');
+    });
+
+    $iframeReset.each(function() {
+      // Re-set the src attribute on each iframe after page load
+      // for Chrome's "incorrect iFrame content on 'back'" bug.
+      // https://code.google.com/p/chromium/issues/detail?id=395791
+      // Need to specifically target video and admin bar
+      this.src = this.src;
+    });
+  }
+};
+
+window.slate = window.slate || {};
+
+/**
+ * A11y Helpers
+ * -----------------------------------------------------------------------------
+ * A collection of useful functions that help make your theme more accessible
+ * to users with visual impairments.
+ *
+ *
+ * @namespace a11y
+ */
+
+slate.a11y = {
+
+  /**
+   * For use when focus shifts to a container rather than a link
+   * eg for In-page links, after scroll, focus shifts to content area so that
+   * next `tab` is where user expects if focusing a link, just $link.focus();
+   *
+   * @param {JQuery} $element - The element to be acted upon
+   */
+  pageLinkFocus: function($element) {
+    var focusClass = 'js-focus-hidden';
+
+    $element.first()
+      .attr('tabIndex', '-1')
+      .focus()
+      .addClass(focusClass)
+      .one('blur', callback);
+
+    function callback() {
+      $element.first()
+        .removeClass(focusClass)
+        .removeAttr('tabindex');
+    }
+  },
+
+  /**
+   * If there's a hash in the url, focus the appropriate element
+   */
+  focusHash: function() {
+    var hash = window.location.hash;
+
+    // is there a hash in the url? is it an element on the page?
+    if (hash && document.getElementById(hash.slice(1))) {
+      this.pageLinkFocus($(hash));
+    }
+  },
+
+  /**
+   * When an in-page (url w/hash) link is clicked, focus the appropriate element
+   */
+  bindInPageLinks: function() {
+    $('a[href*=#]').on('click', function(evt) {
+      this.pageLinkFocus($(evt.currentTarget.hash));
+    }.bind(this));
+  },
+
+  /**
+   * Traps the focus in a particular container
+   *
+   * @param {object} options - Options to be used
+   * @param {jQuery} options.$container - Container to trap focus within
+   * @param {jQuery} options.$elementToFocus - Element to be focused when focus leaves container
+   * @param {string} options.namespace - Namespace used for new focus event handler
+   */
+  trapFocus: function(options) {
+    var eventName = options.namespace
+      ? 'focusin.' + options.namespace
+      : 'focusin';
+
+    if (!options.$elementToFocus) {
+      options.$elementToFocus = options.$container;
+    }
+
+    options.$container.attr('tabindex', '-1');
+    options.$elementToFocus.focus();
+
+    $(document).off('focusin');
+
+    $(document).on(eventName, function(evt) {
+      if (options.$container[0] !== evt.target && !options.$container.has(evt.target).length) {
+        options.$container.focus();
+      }
+    });
+  },
+
+  /**
+   * Removes the trap of focus in a particular container
+   *
+   * @param {object} options - Options to be used
+   * @param {jQuery} options.$container - Container to trap focus within
+   * @param {string} options.namespace - Namespace used for new focus event handler
+   */
+  removeTrapFocus: function(options) {
+    var eventName = options.namespace
+      ? 'focusin.' + options.namespace
+      : 'focusin';
+
+    if (options.$container && options.$container.length) {
+      options.$container.removeAttr('tabindex');
+    }
+
+    $(document).off(eventName);
+  }
+};
+
+/**
+ * Image Helper Functions
+ * -----------------------------------------------------------------------------
+ * A collection of functions that help with basic image operations.
+ *
+ */
+
+theme.Images = (function() {
+
+  /**
+   * Preloads an image in memory and uses the browsers cache to store it until needed.
+   *
+   * @param {Array} images - A list of image urls
+   * @param {String} size - A shopify image size attribute
+   */
+
+  function preload(images, size) {
+    if (typeof images === 'string') {
+      images = [images];
+    }
+
+    for (var i = 0; i < images.length; i++) {
+      var image = images[i];
+      this.loadImage(this.getSizedImageUrl(image, size));
+    }
+  }
+
+  /**
+   * Loads and caches an image in the browsers cache.
+   * @param {string} path - An image url
+   */
+  function loadImage(path) {
+    new Image().src = path;
+  }
+
+  /**
+   * Swaps the src of an image for another OR returns the imageURL to the callback function
+   * @param image
+   * @param element
+   * @param callback
+   */
+  function switchImage(image, element, callback) {
+    var size = this.imageSize(element.src);
+    var imageUrl = this.getSizedImageUrl(image.src, size);
+
+    if (callback) {
+      callback(imageUrl, image, element); // eslint-disable-line callback-return
+    } else {
+      element.src = imageUrl;
+    }
+  }
+
+  /**
+   * +++ Useful
+   * Find the Shopify image attribute size
+   *
+   * @param {string} src
+   * @returns {null}
+   */
+  function imageSize(src) {
+    var match = src.match(/.+_((?:pico|icon|thumb|small|compact|medium|large|grande)|\d{1,4}x\d{0,4}|x\d{1,4})[_\.@]/);
+
+    if (match !== null) {
+      return match[1];
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * +++ Useful
+   * Adds a Shopify size attribute to a URL
+   *
+   * @param src
+   * @param size
+   * @returns {*}
+   */
+  function getSizedImageUrl(src, size) {
+    if (size == null) {
+      return src;
+    }
+
+    if (size === 'master') {
+      return this.removeProtocol(src);
+    }
+
+    var match = src.match(/\.(jpg|jpeg|gif|png|bmp|bitmap|tiff|tif)(\?v=\d+)?$/i);
+
+    if (match != null) {
+      var prefix = src.split(match[0]);
+      var suffix = match[0];
+
+      return this.removeProtocol(prefix[0] + '_' + size + suffix);
+    }
+
+    return null;
+  }
+
+  function removeProtocol(path) {
+    return path.replace(/http(s)?:/, '');
+  }
+
+  return {
+    preload: preload,
+    loadImage: loadImage,
+    switchImage: switchImage,
+    imageSize: imageSize,
+    getSizedImageUrl: getSizedImageUrl,
+    removeProtocol: removeProtocol
+  };
+})();
+
+/**
+ * Currency Helpers
+ * -----------------------------------------------------------------------------
+ * A collection of useful functions that help with currency formatting
+ *
+ * Current contents
+ * - formatMoney - Takes an amount in cents and returns it as a formatted dollar value.
+ *
+ * Alternatives
+ * - Accounting.js - http://openexchangerates.github.io/accounting.js/
+ *
+ */
+
+theme.Currency = (function() {
+  var moneyFormat = '${{amount}}'; // eslint-disable-line camelcase
+
+  function formatMoney(cents, format) {
+    if (typeof cents === 'string') {
+      cents = cents.replace('.', '');
+    }
+    var value = '';
+    var placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+    var formatString = (format || moneyFormat);
+
+    function formatWithDelimiters(number, precision, thousands, decimal) {
+      precision = precision || 2;
+      thousands = thousands || ',';
+      decimal = decimal || '.';
+
+      if (isNaN(number) || number == null) {
+        return 0;
+      }
+
+      number = (number / 100.0).toFixed(precision);
+
+      var parts = number.split('.');
+      var dollarsAmount = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands);
+      var centsAmount = parts[1] ? (decimal + parts[1]) : '';
+
+      return dollarsAmount + centsAmount;
+    }
+
+    switch (formatString.match(placeholderRegex)[1]) {
+      case 'amount':
+        value = formatWithDelimiters(cents, 2);
+        break;
+      case 'amount_no_decimals':
+        value = formatWithDelimiters(cents, 0);
+        break;
+      case 'amount_with_comma_separator':
+        value = formatWithDelimiters(cents, 2, '.', ',');
+        break;
+      case 'amount_no_decimals_with_comma_separator':
+        value = formatWithDelimiters(cents, 0, '.', ',');
+        break;
+      case 'amount_no_decimals_with_space_separator':
+        value = formatWithDelimiters(cents, 0, ' ');
+        break;
+    }
+
+    return formatString.replace(placeholderRegex, value);
+  }
+
+  return {
+    formatMoney: formatMoney
+  }
+})();
+
+/**
+ * Variant Selection scripts
+ * ------------------------------------------------------------------------------
+ *
+ * Handles change events from the variant inputs in any `cart/add` forms that may
+ * exist.  Also updates the master select and triggers updates when the variants
+ * price or image changes.
+ *
+ * @namespace variants
+ */
+
+slate.Variants = (function() {
+
+  /**
+   * Variant constructor
+   *
+   * @param {object} options - Settings from `product.js`
+   */
+  function Variants(options) {
+    this.$container = options.$container;
+    this.product = options.product;
+    this.singleOptionSelector = options.singleOptionSelector;
+    this.originalSelectorId = options.originalSelectorId;
+    this.enableHistoryState = options.enableHistoryState;
+    this.currentVariant = this._getVariantFromOptions();
+
+    $(this.singleOptionSelector, this.$container).on('change', this._onSelectChange.bind(this));
+  }
+
+  Variants.prototype = _.assignIn({}, Variants.prototype, {
+
+    /**
+     * Get the currently selected options from add-to-cart form. Works with all
+     * form input elements.
+     *
+     * @return {array} options - Values of currently selected variants
+     */
+    _getCurrentOptions: function() {
+      var currentOptions = _.map($(this.singleOptionSelector, this.$container), function(element) {
+        var $element = $(element);
+        var type = $element.attr('type');
+        var currentOption = {};
+
+        if (type === 'radio' || type === 'checkbox') {
+          if ($element[0].checked) {
+            currentOption.value = $element.val();
+            currentOption.index = $element.data('index');
+
+            return currentOption;
+          } else {
+            return false;
+          }
+        } else {
+          currentOption.value = $element.val();
+          currentOption.index = $element.data('index');
+
+          return currentOption;
+        }
+      });
+
+      // remove any unchecked input values if using radio buttons or checkboxes
+      currentOptions = _.compact(currentOptions);
+
+      return currentOptions;
+    },
+
+    /**
+     * Find variant based on selected values.
+     *
+     * @param  {array} selectedValues - Values of variant inputs
+     * @return {object || undefined} found - Variant object from product.variants
+     */
+    _getVariantFromOptions: function() {
+      var selectedValues = this._getCurrentOptions();
+      var variants = this.product.variants;
+
+      var found = _.find(variants, function(variant) {
+        return selectedValues.every(function(values) {
+          return _.isEqual(variant[values.index], values.value);
+        });
+      });
+
+      return found;
+    },
+
+    /**
+     * Event handler for when a variant input changes.
+     */
+    _onSelectChange: function() {
+      var variant = this._getVariantFromOptions();
+
+      this.$container.trigger({
+        type: 'variantChange',
+        variant: variant
+      });
+
+      if (!variant) {
+        return;
+      }
+
+      this._updateMasterSelect(variant);
+      this._updateImages(variant);
+      this._updatePrice(variant);
+      this._updateSKU(variant);
+      this.currentVariant = variant;
+
+      if (this.enableHistoryState) {
+        this._updateHistoryState(variant);
+      }
+    },
+
+    /**
+     * Trigger event when variant image changes
+     *
+     * @param  {object} variant - Currently selected variant
+     * @return {event}  variantImageChange
+     */
+    _updateImages: function(variant) {
+      var variantImage = variant.featured_image || {};
+      var currentVariantImage = this.currentVariant.featured_image || {};
+
+      if (!variant.featured_image || variantImage.src === currentVariantImage.src) {
+        return;
+      }
+
+      this.$container.trigger({
+        type: 'variantImageChange',
+        variant: variant
+      });
+    },
+
+    /**
+     * Trigger event when variant price changes.
+     *
+     * @param  {object} variant - Currently selected variant
+     * @return {event} variantPriceChange
+     */
+    _updatePrice: function(variant) {
+      if (variant.price === this.currentVariant.price && variant.compare_at_price === this.currentVariant.compare_at_price) {
+        return;
+      }
+
+      this.$container.trigger({
+        type: 'variantPriceChange',
+        variant: variant
+      });
+    },
+
+    /**
+     * Trigger event when variant sku changes.
+     *
+     * @param  {object} variant - Currently selected variant
+     * @return {event} variantSKUChange
+     */
+    _updateSKU: function(variant) {
+      if (variant.sku === this.currentVariant.sku) {
+        return;
+      }
+
+      this.$container.trigger({
+        type: 'variantSKUChange',
+        variant: variant
+      });
+    },
+
+    /**
+     * Update history state for product deeplinking
+     *
+     * @param  {variant} variant - Currently selected variant
+     * @return {k}         [description]
+     */
+    _updateHistoryState: function(variant) {
+      if (!history.replaceState || !variant) {
+        return;
+      }
+
+      var newurl = window.location.protocol + '//' + window.location.host + window.location.pathname + '?variant=' + variant.id;
+      window.history.replaceState({path: newurl}, '', newurl);
+    },
+
+    /**
+     * Update hidden master select of variant change
+     *
+     * @param  {variant} variant - Currently selected variant
+     */
+    _updateMasterSelect: function(variant) {
+      $(this.originalSelectorId, this.$container).val(variant.id);
+    }
+  });
+
+  return Variants;
+})();
+
+
+
+/*================ SECTIONS ================*/
+
+/* eslint-disable no-new */
+theme.Product = (function() {
+  function Product(container) {
+    var $container = this.$container = $(container);
+    var sectionId = $container.attr('data-section-id');
+
+    this.settings = {
+      // Breakpoints from src/stylesheets/global/variables.scss.liquid
+      mediaQueryMediumUp: 'screen and (min-width: 750px)',
+      mediaQuerySmall: 'screen and (max-width: 749px)',
+      bpSmall: false,
+      enableHistoryState: $container.data('enable-history-state') || false,
+      imageSize: null,
+      imageZoomSize: null,
+      namespace: '.slideshow-' + sectionId,
+      sectionId: sectionId,
+      sliderActive: false,
+      zoomEnabled: false
+    };
+
+    this.selectors = {
+      addToCart: '#AddToCart-' + sectionId,
+      addToCartText: '#AddToCartText-' + sectionId,
+      comparePrice: '#ComparePrice-' + sectionId,
+      originalPrice: '#ProductPrice-' + sectionId,
+      SKU: '.variant-sku',
+      originalPriceWrapper: '.product-price__price-' + sectionId,
+      originalSelectorId: '#ProductSelect-' + sectionId,
+      productFeaturedImage: '#FeaturedImage-' + sectionId,
+      productImageWrap: '#FeaturedImageZoom-' + sectionId,
+      productPrices: '.product-single__price-' + sectionId,
+      productThumbImages: '.product-single__thumbnail--' + sectionId,
+      productThumbs: '.product-single__thumbnails-' + sectionId,
+      saleClasses: 'product-price__sale product-price__sale--single',
+      saleLabel: '.product-price__sale-label-' + sectionId,
+      singleOptionSelector: '.single-option-selector-' + sectionId
+    }
+
+    // Stop parsing if we don't have the product json script tag when loading
+    // section in the Theme Editor
+    if (!$('#ProductJson-' + sectionId).html()) {
+      return;
+    }
+
+    this.productSingleObject = JSON.parse(document.getElementById('ProductJson-' + sectionId).innerHTML);
+
+    this.settings.zoomEnabled = $(this.selectors.productFeaturedImage).hasClass('js-zoom-enabled');
+    this.settings.imageSize = theme.Images.imageSize($(this.selectors.productFeaturedImage).attr('src'));
+
+    if (this.settings.zoomEnabled) {
+      this.settings.imageZoomSize = theme.Images.imageSize($(this.selectors.productImageWrap).data('zoom'));
+    }
+
+    this._stringOverrides();
+    this._initVariants();
+
+    // Pre-loading product images to avoid a lag when a thumbnail is clicked, or
+    // when a variant is selected that has a variant image
+    theme.Images.preload(this.productSingleObject.images, this.settings.imageSize);
+  }
+
+  Product.prototype = _.assignIn({}, Product.prototype, {
+    _stringOverrides: function() {
+      theme.productStrings = theme.productStrings || {};
+      $.extend(theme.strings, theme.productStrings);
+    },
+
+    _initVariants: function() {
+      var options = {
+        $container: this.$container,
+        enableHistoryState: this.$container.data('enable-history-state') || false,
+        singleOptionSelector: this.selectors.singleOptionSelector,
+        originalSelectorId: this.selectors.originalSelectorId,
+        product: this.productSingleObject
       };
 
-      items.push(item);
-    });
+      this.variants = new slate.Variants(options);
 
-    // Gather all cart data and add to DOM
-    data = {
-      items: items,
-      note: cart.note,
-      totalPrice: Shopify.formatMoney(cart.total_price, ajaxCartConfig.moneyFormat)
-    }
+      this.$container.on('variantChange' + this.settings.namespace, this._updateAddToCart.bind(this));
+      this.$container.on('variantPriceChange' + this.settings.namespace, this._updatePrice.bind(this));
+      this.$container.on('variantSKUChange' + this.settings.namespace, this._updateSKU.bind(this));
+    },
 
-    $cartContainer.append(template(data));
-    $('.enj-cartcount').html(cart.item_count);
-    $('body').removeClass('drawer--is-loading');
-    $('body').trigger('ajaxCart.afterCartLoad', cart);
-    $('.js-call-minicart').click();
-    $('.js-number-cart').addClass('active');
-  };
+    _destroyThumbnailSlider: function() {
+      $(this.selectors.productThumbs).slick('unslick');
+      this.settings.sliderActive = false;
+    },
 
-  function convertToSlug(text) {
-    return text.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
-  } window.convertToSlug=convertToSlug;
-
-
-  $(document).ready(function() {
-    if ($(window).width() < 992 ) {
-      responsiveQuickview();
-    } else {
-      quickView();
-    }
-    $(window).resize(function(){
-      if ($(window).width() < 992 ) {
-        responsiveQuickview();
-      } else {
-        quickView();
-      }
-    })
-
-  });
-
-  $(document).on('click','.overlay,.continue-shopping, .close-window', function() {
-    hidePopup('.tshopify-popup');
-
-    setTimeout(function(){
-      $('.loading').removeClass('loaded-content');
-    },500);
-    return false;
-  });
-
-
-  function responsiveQuickview() {
-    if ($(window).width() < 992 ) {
-      $('.engoj_btn_quickview').each(function(){
-        var linkProduct='/products/' + $(this).attr('data-id');
-        $(this).attr('href',linkProduct);    
-      })
-    } else {
-      $('.engoj_btn_quickview').attr('href','javascript:void(0)');
-    }
-    $(window).resize(function(){
-      if ($(window).width() < 992 ) {
-        $('.engoj_btn_quickview').each(function(){
-          var linkProduct='/products/' + $(this).attr('data-id');
-          $(this).attr('href',linkProduct);    
-        })
-      } else {
-        $('.engoj_btn_quickview').attr('href','javascript:void(0)');
-      }
-    })
-  }
-
-  function quickView() {
-    $('.engoj_btn_quickview').click(function() {
-      showPopup('.loading');
-      var id = $(this).data('id');
-      var rating = (($(this).closest('.product-info').find('.spr-badge').attr('data-rating')) * 20)+"%";
-
-      Shopify.getProduct(id, function(product) {
-        var template = $('#quick-view').html();
-        $('.quickview-product').html(template);
-        var quickview = $('.quickview-product');
-        quickview.find('.product-name a').html(product.title).attr('href', product.url);
-        quickview.find('.spr-badge .spr-active').css({"width": rating});
-        quickview.find('.star-rating .shopify-product-reviews-badge').attr('data-id',product.id)
-        if (quickview.find('.des').length > 0) {
-          var description = product.description.replace(/(<([^>]+)>)/ig, "");
-          description = description.split(" ").splice(0, 20).join(" ") + "...";
-          quickview.find('.des').text(description);
-        } else {
-          quickview.find('.des').remove();
-        }
-
-        quickview.find('.price').html(Shopify.formatMoney(product.price, window.money_format));
-        quickview.find('.product-inner').attr('id', 'product-' + product.id);
-        quickview.find('.variants').attr('id', 'product-actions-' + product.id);
-        quickview.find('.variants select').attr('id', 'product-select-' + product.id);
-
-        if (product.compare_at_price > product.price) {
-          quickview.find('.compare-price').html(Shopify.formatMoney(currencyConverter(product.compare_at_price_max), window.money_format)).show();
-          quickview.find('.price').addClass('on-sale');
-        } else {
-          quickview.find('.compare-price').html('');
-          quickview.find('.price').removeClass('on-sale');
-        }
-
-        //out of stock
-        if (!product.available) {
-          quickview.find("select, input, .total-price, .dec, .inc, .variants label").remove();
-          quickview.find(".btn-addToCart").text('unavailable').addClass('disabled').attr("disabled", "disabled");;
-        } else {
-          quickview.find('.total-price span').html(Shopify.formatMoney(currencyConverter(product.price), window.money_format));
-
-          
-          tshopifyQuickview.createQuickViewVariantsSwatch(product, quickview);
-          
-        }
-
-        qtyProduct();
-        tshopifyQuickview.quickViewSlider(product, quickview);
-        tshopifyQuickview.initQuickviewAddToCart();
-
-
-        $('.quickview-product').addClass('active');
-        $('.loading').addClass('loaded-content');
-
-        if ($('.quickview-product .total-price').length > 0) {
-          $('.quickview-product span[class=qtyplus]').on('click', tshopifyQuickview.updatePricingQuickview);
-          $('.quickview-product span[class=qtyminus]').on('click', tshopifyQuickview.updatePricingQuickview);
-        }
-
-      });
-      return false;
-    });
-  } window.quickView=quickView;
-
-  var tshopifyQuickview = {
-
-    selectCallbackQuickview: function(variant, selector) {
-      var self = this;
-      var productItem = jQuery('.quickview-product .product-item'),
-          addToCart = productItem.find('.btn-addToCart'),
-          productPrice = productItem.find('.price'),
-          comparePrice = productItem.find('.compare-price'),
-          totalPrice = productItem.find('.total-price span');
-
-      if (variant && variant.featured_image) {
-        var originalImage = jQuery(".engoj_img_main_quickview");
-        var newImage = variant.featured_image;
-        var element = originalImage[0];
-        Shopify.Image.switchImage(newImage, element, function (newImageSizedSrc, newImage, element) {
-          var $el = $(element);
-          $el.attr('src', newImageSizedSrc);
-        });        
-      }
+    _updateAddToCart: function(evt) {
+      var variant = evt.variant;
 
       if (variant) {
+        $(this.selectors.productPrices)
+          .removeClass('visibility-hidden')
+          .attr('aria-hidden', 'true');
+
         if (variant.available) {
-          addToCart.removeClass('disabled').removeAttr('disabled').text('Add to Cart');
-                                                                        } else {
-                                                                        
-                                                                        addToCart.val('sold_out').addClass('disabled').attr('disabled', 'disabled').text('Sold Out');
-        }
-        productPrice.html(Shopify.formatMoney(currencyConverter(variant.price), window.money_format));
-
-
-
-          if ( variant.compare_at_price > variant.price ) {
-            comparePrice.html(Shopify.formatMoney(currencyConverter(variant.compare_at_price), window.money_format)).show();
-            productPrice.addClass('on-sale');
-          } else {
-            comparePrice.hide();
-            productPrice.removeClass('on-sale');
-          }
-
-          var form = jQuery('#' + selector.domIdPrefix).closest('form');
-          for (var i=0,length=variant.options.length; i<length; i++) {
-            var radioButton = form.find('.swatch[data-option-index="' + i + '"] :radio[value="' + variant.options[i] +'"]');
-            if (radioButton.length) {
-              radioButton.get(0).checked = true;
-            }
-          }
-
-
-          var inventoryInfo = productItem.find('.product-inventory span');
-          if (variant.available) {
-            if (variant.inventory_management!=null) {
-              inventoryInfo.text(variant.inventory_quantity + " " + 'in_stock');
-            } else {
-              inventoryInfo.text('many_in_stock');
-            }
-          } else {
-            inventoryInfo.text('out_of_stock');
-          }
-
-          // Total:
-          var regex = /([0-9]+[.|,][0-9]+[.|,][0-9]+)/g;
-          var unitPriceTextMatch = $('.quickview-product .price').text().match(regex);
-
-          if (!unitPriceTextMatch) {
-            regex = /([0-9]+[.|,][0-9]+)/g;
-            unitPriceTextMatch = $('.quickview-product .price').text().match(regex);
-          }
-
-          if (unitPriceTextMatch) {
-            var unitPriceText = unitPriceTextMatch[0];
-            var unitPrice = unitPriceText.replace(/[.|,]/g, '');
-            var quantity = parseInt($('.quickview-product input[name=quantity]').val());
-            var totalPrice = unitPrice * quantity;
-            totalPrice = currencyConverter(totalPrice);
-
-            var totalPriceText = Shopify.formatMoney(totalPrice, window.money_format);
-            regex = /([0-9]+[.|,][0-9]+[.|,][0-9]+)/g;
-            if (!totalPriceText.match(regex)) {
-              regex = /([0-9]+[.|,][0-9]+)/g;
-            }
-            totalPriceText = totalPriceText.match(regex)[0];
-
-            var regInput = new RegExp(unitPriceText, "g");
-            var totalPriceHtml = $('.quickview-product .price').html().replace(regInput, totalPriceText);
-
-            $('.quickview-product .total-price span').html(totalPriceHtml);
-          }
-
-          if (variant && variant.featured_image) {
-            var newImage = Shopify.resizeImage(variant.featured_image.src, 'small');
-            newImage = newImage.replace(/https?:/,'');
-            jQuery('.quick-view .quickview-more-views img').each(function() {
-              var grandSize = jQuery(this).attr('src');
-              if (grandSize == newImage) {
-                jQuery(this).parent().trigger('click');
-                return false;
-              }
-            });
-          }
-
+          $(this.selectors.addToCart).prop('disabled', false);
+          $(this.selectors.addToCartText).text(theme.strings.addToCart);
         } else {
-          addToCart.text('unavailable').addClass('disabled').attr('disabled', 'disabled');
+          // The variant doesn't exist, disable submit button and change the text.
+          // This may be an error or notice that a specific variant is not available.
+          $(this.selectors.addToCart).prop('disabled', true);
+          $(this.selectors.addToCartText).text(theme.strings.soldOut);
         }
+      } else {
+        $(this.selectors.addToCart).prop('disabled', true);
+        $(this.selectors.addToCartText).text(theme.strings.unavailable);
+        $(this.selectors.productPrices)
+          .addClass('visibility-hidden')
+          .attr('aria-hidden', 'false');
+      }
+    },
 
-        Currency.convertAll(shopCurrency, jQuery('#currencies a.selected').attr('data-currency'));
-        jQuery('.selected-currency').text(Currency.currentCurrency);
+    _updatePrice: function(evt) {
+      var variant = evt.variant;
 
-      },
-        /* Quick View SWATCH */
-        createQuickViewVariantsSwatch: function(product, quickviewTemplate) {
-          var self = this;
-          if (product.variants.length > 1) {
-            for (var i = 0; i < product.variants.length; i++) {
-              var variant = product.variants[i];
-              var option = '<option value="' + variant.id + '">' + variant.title + '</option>';
-              quickviewTemplate.find('form.variants > select').append(option);
-            }
+      // Update the product price
+      $(this.selectors.originalPrice).html(theme.Currency.formatMoney(variant.price, theme.moneyFormat));
 
-            new Shopify.OptionSelectors("product-select-" + product.id, {
-              product: product,
-              onVariantSelected: self.selectCallbackQuickview,
-              enableHistoryState: true
-            });
+      // Update and show the product's compare price if necessary
+      if (variant.compare_at_price > variant.price) {
+        $(this.selectors.comparePrice)
+          .html(theme.Currency.formatMoney(variant.compare_at_price, theme.moneyFormat))
+          .removeClass('hide');
 
-            var filePath = window.file_url.substring(0, window.file_url.lastIndexOf('?'));
-            var assetUrl = window.asset_url.substring(0, window.asset_url.lastIndexOf('?'));
-            var options = "";
+        $(this.selectors.originalPriceWrapper).addClass(this.selectors.saleClasses);
 
-            for (var i = 0; i < product.options.length; i++) {
-              options += '<div class="swatch clearfix" data-option-index="' + i + '">';
-              options += '<div class="header">' + product.options[i].name + '</div>';
-              var is_color = false;
-              if (/Color|Colour/i.test(product.options[i].name)) {
-                is_color = true;
-              }
-              var optionValues = new Array();
-              for (var j = 0; j < product.variants.length; j++) {
-                var variant = product.variants[j];
-                var value = variant.options[i];
-                var valueHandle = convertToSlug(value);
-                var forText = 'swatch-' + i + '_' + valueHandle;
-                if (optionValues.indexOf(value) < 0) {
-                  //not yet inserted
-                  options += '<div data-value="' + value + '" class=" swatch_rectangle1   ' + (is_color ? "color" : "") + valueHandle + (variant.available ? ' available ' : ' soldout ') + '">';
+        $(this.selectors.saleLabel).removeClass('hide');
+      } else {
+        $(this.selectors.comparePrice).addClass('hide');
+        $(this.selectors.saleLabel).addClass('hide');
+        $(this.selectors.originalPriceWrapper).removeClass(this.selectors.saleClasses);
+      }
+    },
 
-                  
-                  options += '<input id="' + forText + '" type="radio" name="option-' + i + '" value="' + value + '" ' + (j == 0 ? ' checked ' : '') + (variant.available ? '' : ' disabled') + ' />';
+    _updateSKU: function(evt) {
+      var variant = evt.variant;
 
-                  if (is_color) {
-                    
-                    options += '<label class="rectangle_style1" for="' + forText + '"><span class = "text_rec">' + valueHandle + '</span></label>';
-                    
-                    
-                    
-                  } else {
-                    
-                    options += '<label class="rectangle_style1" for="' + forText + '"><span class = "text_rec">' + valueHandle + '</span></label>';
-                    
-                  }
-                  options += '</div>';
-                  if (variant.available) {
-                    $('.quickview-product .swatch[data-option-index="' + i + '"] .' + valueHandle).removeClass('soldout').addClass('available').find(':radio').removeAttr('disabled');
-                  }
-                  optionValues.push(value);
-                }
-              }
-              options += '</div>';
-            }
-            quickviewTemplate.find('form.variants > select').after(options);
-            quickviewTemplate.find('.swatch :radio').change(function() {
-              var optionIndex = $(this).closest('.swatch').attr('data-option-index');
-              var optionValue = $(this).val();
-              $(this)
-              .closest('form')
-              .find('.single-option-selector')
-              .eq(optionIndex)
-              .val(optionValue)
-              .trigger('change');
-            });
+      // Update the sku
+      $(this.selectors.SKU).html(variant.sku);
+    },
 
-            if (product.available && product.options.size > 1) {
-              Shopify.optionsMap = {};
-              Shopify.linkOptionSelectors(product);
-            }
-
-          } else {
-            quickviewTemplate.find('form.variants > select').remove();
-            var variant_field = '<input type="hidden" name="id" value="' + product.variants[0].id + '">';
-            quickviewTemplate.find('form.variants').append(variant_field);
-          }
-        },
-
-          /* Quick View */
-          createQuickViewVariants: function(product, quickviewTemplate) {
-            var self = this;
-            if (product.variants.length > 1) {
-              for (var i = 0; i < product.variants.length; i++) {
-                var variant = product.variants[i];
-                var option = '<option value="' + variant.id + '">' + variant.title + '</option>';
-                quickviewTemplate.find('form.variants > select').append(option);
-              }
-
-              new Shopify.OptionSelectors("product-select-" + product.id, {
-                product: product,
-                onVariantSelected: self.selectCallbackQuickview,
-                enableHistoryState: true
-              });
-
-              //$('.quickview-product .single-option-selector').selectize();
-              $('.quickview-product .selectize-input input').attr("disabled", "disabled");
-
-              if (product.options.length == 1) {
-                $('.selector-wrapper:eq(0)').prepend('<label>' + product.options[0].name + '</label>');
-              }
-
-              quickviewTemplate.find('form.variants .selector-wrapper label').each(function(i, v) {
-                $(this).html(product.options[i].name);
-              });
-
-            } else {
-              quickviewTemplate.find('form.variants > select').remove();
-              var variant_field = '<input type="hidden" name="id" value="' + product.variants[0].id + '">';
-              quickviewTemplate.find('form.variants').append(variant_field);
-            }
-
-          },
-
-            /* Quick View VIEWMORE Slider */
-            quickViewSlider: function(product, quickviewTemplate) {
-              var featuredImage = Shopify.resizeImage(product.featured_image, 'grande');
-              quickviewTemplate.find('.featured-image').append('<a title="'+ product.title +'" class="product-photo" href="' + product.url + '"><img class="engoj_img_main_quickview lazyload" data-src="' + featuredImage + '" alt="' + product.title + '"/><span class="loading" style="height: 100%; width: 100%; top:0; left:0 z-index: 999; position: absolute; display: none; background: url(' + window.loading_url + ') center no-repeat;"></span></a>');
-              if (product.images.length != 0) {
-                var quickViewCarousel = quickviewTemplate.find('.more-views .owl-carousel');
-
-                for (i in product.images) {
-                  var grande = Shopify.resizeImage(product.images[i], 'grande');
-                  var compact = Shopify.resizeImage(product.images[i], 'compact');
-                  var item = '<div class="item"><a href="javascript:void(0)" data-image="' + grande + '"><img data-src="' + compact + '" class="lazyload"  /></a></div>';
-                  quickViewCarousel.append(item);
-                }
-
-                quickViewCarousel.find('a').click(function() {
-                  var featureImage = quickviewTemplate.find('.featured-image img');
-                  var moreviewLoad = quickviewTemplate.find('.featured-image .loading');
-                  if (featureImage.attr('src') != $(this).attr('data-image')) {
-                    featureImage.attr('src', $(this).attr('data-image'));
-                    moreviewLoad.show();
-                    featureImage.on('load', function(e){
-                      moreviewLoad.hide();
-                      $(this).unbind('load');
-                      moreviewLoad.hide();
-                    });
-                  }
-                });
-                
-                setTimeout(function(){
-                  var img = $('.owl-carousel').find('.item')
-                  if (img.length > 3) {
-                    $('.quickview-product .owl-carousel').slick({
-                      slidesToShow: 3,
-                      slideToScroll:1,
-                      dots : false,
-                      arrows : false,
-                      
-                    })
-                  }
-                },1000)
-
-              } else {
-                quickviewTemplate.find('.more-views').remove();
-              }
-
-            },
-
-              /* Quick View ADD TO CART */
-              initQuickviewAddToCart: function() {
-                if ($('.quickview-product .btn-addToCart').length > 0) {
-                  $('.quickview-product .btn-addToCart').click(function() {
-                    var variant_id = $('.quickview-product select[name=id]').val();
-                    if (!variant_id) {
-                      variant_id = $('.quickview-product input[name=id]').val();
-                    }
-                    var quantity = $('.quickview-product input[name=quantity]').val();
-                    if (!quantity) {
-                      quantity = 1;
-                    }
-
-                    var title = $('.quickview-product .product-title a').html();
-                    var image = $('.quickview-product .featured-image img').attr('src');
-
-                    doAjaxAddToCart(variant_id, quantity, title, image);
-
-                  });
-                }
-              },
-                /* Quick View update Pricing */
-                updatePricingQuickview: function() {
-                  var regex = /([0-9]+[.|,][0-9]+[.|,][0-9]+)/g;
-                  var unitPriceTextMatch = $('.quickview-product .price').text().match(regex);
-
-                  if (!unitPriceTextMatch) {
-                    regex = /([0-9]+[.|,][0-9]+)/g;
-                    unitPriceTextMatch = $('.quickview-product .price').text().match(regex);
-                  }
-
-                  if (unitPriceTextMatch) {
-                    var unitPriceText = unitPriceTextMatch[0];
-                    var unitPrice = unitPriceText.replace(/[.|,]/g, '');
-                    var quantity = parseInt($('.quickview-product input[name=quantity]').val());
-                    var totalPrice = unitPrice * quantity;
-
-                    var totalPriceText = Shopify.formatMoney(totalPrice, window.money_format);
-                    regex = /([0-9]+[.|,][0-9]+[.|,][0-9]+)/g;
-                    if (!totalPriceText.match(regex)) {
-                      regex = /([0-9]+[.|,][0-9]+)/g;
-                    }
-                    totalPriceText = totalPriceText.match(regex)[0];
-
-                    var regInput = new RegExp(unitPriceText, "g");
-                    var totalPriceHtml = $('.quickview-product .price').html().replace(regInput, totalPriceText);
-
-                    $('.quickview-product .total-price span').html(totalPriceHtml);
-                  }
-                }
-
+    onUnload: function() {
+      this.$container.off(this.settings.namespace);
     }
-  })(jQuery);
+  });
+
+
+  return Product;
+})();
+
+$(document).ready(function() {
+  var sections = new theme.Sections();
+
+  sections.register('product', theme.Product);
+  sections.register('product-template', theme.Product);
+  
+});

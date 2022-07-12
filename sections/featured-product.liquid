@@ -1,0 +1,221 @@
+{%- assign product = all_products[section.settings.featured_product] -%}
+
+{% if product.empty? %}
+  {%- assign section_onboarding = true -%}
+{% endif %}
+<div class="container wow fadeInUp" itemscope itemtype="http://schema.org/Product" id="ProductSection-{{ section.id }}" data-section-id="{{ section.id }}" data-section-type="product">
+	<meta itemprop="name" content="{{ product.title }}">
+	<meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+	<meta itemprop="image" content="{{ product.featured_image.src | img_url: '800x' }}">
+	{% comment %}
+	Get first variant, or deep linked one
+	{% endcomment %}
+	{%- assign current_variant = product.selected_or_first_available_variant -%}
+	{%- assign product_thumb_size = '160x160' -%}
+	{%- assign product_image_zoom_size = '1024x1024' -%}
+	{%- assign enable_zoom = section.settings.enable_zoom -%}
+	
+	{% case section.settings.image_size %}
+	{% when 'small' %}
+	{%- assign product_image_width = 'col-sm-6 col-md-5' -%}
+	{%- assign product_description_width = 'col-sm-6 col-md-7' -%}
+	{%- assign product_thumbnail_width = 'medium-up--one-third' -%}
+	{%- assign product_image_size = '600x' -%}   
+	{% when 'large' %}
+	{%- assign product_image_width = 'col-sm-6 col-md-6' -%}
+	{%- assign product_description_width = 'col-sm-6 col-md-6' -%}
+	{%- assign product_thumbnail_width = 'medium-up--one-fifth' -%}
+	{%- assign product_image_size = '600x' -%}   
+	{% endcase %}
+	<div class="row row-table product-single">
+		<div class="wow fadeInLeft row-cell product-single__photos {{ product_image_width }}{% if section.settings.image_size == 'full' %} product-single__photos--full{% endif %}" data-wow-delay="100ms"> {%- assign featured_img_src = current_variant.featured_image.src | default: product.featured_image.src -%}
+			{%- assign featured_img_alt = current_variant.featured_image.alt | default: product.featured_image.alt -%}
+			<div id="FeaturedImageZoom-{{ section.id }}" class="product-single__photo{% if product.images.size > 1 %} product-single__photo--has-thumbnails{% endif %}" {% if enable_zoom %}data-zoom="{{ featured_img_src | img_url: product_image_zoom_size }}"{% endif %}>
+			{% unless section_onboarding %} <img src="{{ featured_img_src | img_url: product_image_size}}" alt="{{ featured_img_alt }}" id="FeaturedImage-{{ section.id }}" class="product-featured-img{% if enable_zoom %} js-zoom-enabled{% endif %}"> {% else %}
+			{{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+			{% endunless %} </div>
+	</div>
+	<div class="wow fadeInRight row-cell {{ product_description_width }}" data-wow-delay="200ms">
+		<div class="product-single__meta"> {% unless section_onboarding %}
+			{%- assign compare_at_price = current_variant.compare_at_price -%}
+			{%- assign price = current_variant.price -%}
+			{%- assign price_varies = current_variant.price_varies -%}
+			{%- assign available = current_variant.available -%}
+			{% else %}
+			{%- assign compare_at_price = 1999 -%}
+			{%- assign price = 1999 -%}
+			{%- assign price_varies = false -%}
+			{%- assign available = true -%}
+			{% endunless %}
+			<h2 class="grid_item-title">{{ section.settings.featured_product_lbl }}</h2>
+			<h1 itemprop="name" class="product-single__title">
+             <a href="{{ product.url | within: collection }}">{{ product.title }}</a>
+            </h1>
+			{% if section.settings.show_vendor %}
+			<p itemprop="brand" class="product-single__vendor">{{ product.vendor }}</p>
+			{% endif %}        	        
+			
+			{% if section.settings.show_product_review %} <span class="shopify-product-reviews-badge" data-id="{{ product.id }}"></span> {% endif %}
+			<div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+				<meta itemprop="priceCurrency" content="{{ shop.currency }}">
+				<link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+				<p class="product-single__price product-single__price-{{ section.id }}{% unless current_variant.available %} product-price--sold-out{% endunless %}"> {% if compare_at_price > price %} <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span> <s id="ComparePrice-{{ section.id }}">{{ compare_at_price | money }}</s> <span class="product-price__price product-price__price-{{ section.id }} product-price__sale product-price__sale--single"> <span id="ProductPrice-{{ section.id }}">{{ price | money }}</span> </span> {% else %} <span class="visually-hidden">{{ 'products.product.regular_price' | t }}</span> <s id="ComparePrice-{{ section.id }}" class="hide">{{ compare_at_price | money }}</s> <span class="product-price__price product-price__price-{{ section.id }}"> <span id="ProductPrice-{{ section.id }}">{{ price | money }}</span> </span> {% endif %} </p>
+				<div class="product-single__description rte" itemprop="description"> {% unless product.empty? %}
+					{{ product.description | truncatewords: 60 }}
+					{% else %}
+					{{ 'homepage.onboarding.product_description' | t }}
+					{% endunless %} </div>
+				<form action="/cart/add" method="post" enctype="multipart/form-data" class="product-form product-form-{{ section.id }}{% unless section.settings.show_variant_labels %} product-form--hide-variant-labels{% endunless %}" data-section="{{ section.id }}">
+					<div class="variant-row"> {% unless section_onboarding %}
+						{% unless product.options.size == 1 and product.variants[0].title == 'Default Title' %}
+						{% for option in product.options_with_values %}
+						<div class="selector-wrapper js product-form__item">
+							<label {% if option.name == 'default' %}class="label--hidden" {% endif %}for="SingleOptionSelector-{{ section.id }}-{{ forloop.index0 }}">
+							{{ option.name }}
+							</label>
+							<select class="single-option-selector single-option-selector-{{ section.id }} product-form__input" id="SingleOptionSelector-{{ section.id }}-{{ forloop.index0 }}" data-index="option{{ forloop.index }}">
+								
+                      {% for value in option.values %}
+                        
+								<option value="{{ value | escape }}"{% if option.selected_value == value %} selected="selected"{% endif %}>
+								{{ value }}
+								</option>
+								
+                      {% endfor %}
+                    
+							</select>
+						</div>
+						{% endfor %}
+						{% endunless %}
+						<select name="id" id="ProductSelect-{{ section.id }}" data-section="{{ section.id }}" class="product-form__variants no-js">
+							
+                {% for variant in product.variants %}
+                  {% if variant.available %}
+                    
+							<option {% if variant == product.selected_or_first_available_variant %} selected="selected" {% endif %} value="{{ variant.id }}">
+							
+                      {{ variant.title }}
+                    
+							</option>
+							
+                  {% else %}
+                    
+							<option disabled="disabled">{{ variant.title }} - {{ 'products.product.sold_out' | t }}</option>
+							
+                  {% endif %}
+                {% endfor %}
+              
+						</select>
+						{% endunless %} </div>
+					<div class="product-form__item product-form__item--submit">
+						<button type="submit" name="add" id="AddToCart-{{ section.id }}" {% unless current_variant.available %}disabled="disabled"{% endunless %} class="btn product-form__cart-submit{% if product.options.size == 1 and product.variants[0].title == 'Default Title' %} product-form__cart-submit--small{% endif %}">
+						<span id="AddToCartText-{{ section.id }}"> {% unless current_variant.available %}
+						{{ 'products.product.sold_out' | t }}
+						{% else %}
+						{{ 'products.product.add_to_cart' | t }}
+						{% endunless %} </span>
+						</button>
+						{% if section.settings.show_readmore_button %} <a href="{{ product.url | within: collection }}" class="btn btn-secondary">View More</a> {% endif %} </div>
+				</form>
+			</div>
+			{% if section.settings.show_share_buttons %}
+			{% include 'social-sharing', share_title: product.title, share_permalink: product.url, share_image: product %}
+			{% endif %} </div>
+	</div>
+  </div>
+</div>
+{% unless product.empty? %} 
+<script type="application/json" id="ProductJson-{{ section.id }}">
+    {{ product | json }}
+  </script> 
+{% endunless %}
+
+{% schema %}
+  {
+    "name": "Single Product",
+    "class": "index-section index-section--featured-product",
+    "settings": [
+     { 
+		"type": "color",
+        "id": "featured_product__bg",
+		"label":" Product Box Background",
+        "default": "#fafafa"
+		
+	 },
+	 { 
+		"type": "color",
+        "id": "featured_product__box_border",
+		"label":" Product Box Border",
+        "default": "#e7e7e7"
+		
+	 },
+	  {
+        "type": "text",
+        "id": "featured_product_lbl",
+		"label":" Product Box Title",
+        "default": "Deal Of the Day"
+      },
+      {
+        "type": "product",
+        "id": "featured_product",
+        "label": "Product"
+      },	
+      {
+        "type": "select",
+        "id": "image_size",
+        "label": "Image size",
+        "options": [
+          {
+            "value": "small",
+            "label": "Small"
+          },         
+          {
+            "value": "large",
+            "label": "Large"
+          }         
+        ],
+        "default": "small"
+      },            
+      {
+        "type": "checkbox",
+        "id": "show_vendor",
+        "label": "Show vendor",
+        "default": false
+      },
+	  {
+        "type": "checkbox",
+        "id": "show_product_review",
+        "label": "Show product review",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_zoom",
+        "label": "Enable image zoom",
+        "default": true
+      },
+		 {
+        "type": "checkbox",
+        "id": "show_readmore_button",
+        "label": "Show read more button",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "show_share_buttons",
+        "label": "Show social sharing buttons",
+        "default": true
+      }
+    ],
+    "presets": [
+      {
+        "name": "Single Product",
+        "category": "Product"
+      }
+    ]
+  }
+{% endschema %} 
+<style>
+  .index-section--featured-product .row.product-single { border:1px solid {{ section.settings.featured_product__box_border}};
+    background:{{section.settings.featured_product__bg }};	}
+</style>

@@ -1,0 +1,139 @@
+{% unless template contains 'style2' %}
+  {% if section.settings.layout_style == 'lookbook1' %}
+  <div class="row lookbook">
+    {% for block in section.blocks limit: section.blocks.size%}
+      {% if block.type == 'lookbook1' %}
+      <div class="col-xs-6">
+        {% if block.settings.image!= blank %} 
+          <img src="{{ block.settings.image | img_url:'800x500' }}" alt />
+        <div class="caption">
+          <h2>{{ block.settings.title }}</h2>
+        {% if block.settings.url != blank %}
+          <a class="btn" href="{{ block.settings.url}}" >{{ block.settings.buttontext }} <i class="fa fa-caret-right" aria-hidden="true"></i> </a>
+        {% endif %}  
+        </div>
+        <a class="overlay" {% if block.settings.url != blank %} href="{{ block.settings.url}}" {% endif %}></a> {% endif %} </div>
+      {% endif %}
+      {% endfor %} </div>
+  {% endif %}
+{% endunless %}
+
+{% if section.settings.layout_style == 'lookbook2' or template contains 'style2' %}
+  <div class="container">
+	<div class="grid-masonary lookbook2">
+		<div class="grid-sizer"></div>
+		<div class="gutter-sizer"></div>
+		{% for block in section.blocks limit: section.blocks.size %}
+      		{% if block.type == 'lookbook2' %}
+              <div class="grid-lookbook"> 
+                {% if block.type == 'lookbook2' %}
+                  {% if block.settings.image!= blank %} 
+
+                {% if block.settings.url != blank %}<a href="{{ block.settings.url}}" >{% endif %}  
+                <img src="{{ block.settings.image | img_url:'master' }}" alt />
+                {% if block.settings.url != blank %}</a>{% endif %}  
+
+                 {% if block.settings.title != blank %}
+                <h2>{{ block.settings.title }}</h2>
+                {% endif %}  
+
+                 {% if block.settings.url != blank %}
+                <span class="btn">{{ block.settings.buttontext }}</span>
+                {% endif %}  
+
+                      {% endif %}
+                  {% endif %} 
+       		</div>
+      		{% endif %} 
+		{% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+
+{% schema %}
+  {
+    "name": "Lookbook Page",
+	"max_blocks":50,
+    "settings": [
+		{
+			"type":"paragraph",
+			"content":"Add more content on this page from pages => Lookbook page"
+		},
+		{	
+			"type":"select",
+			"id":"layout_style",
+			"label":"Layout Style",
+			"default":"lookbook1",
+			"options": [         
+              {
+                "value": "lookbook1",
+                "label": "Lookbook 1"
+              },
+              {
+                "value": "lookbook2",
+                "label": "Lookbook 2"
+              }              
+            ]
+		
+		}
+	 ],
+	"blocks":[
+		{
+			"name":"Lookbook 1",
+			"type":"lookbook1",
+		 	"settings":[
+			{
+			"type":"image_picker",
+			"id":"image",
+		     "label":"Add Image",
+			 "info":"Recommanded size minimum 800x500"
+		    },
+			{
+			"type":"text",
+			"id":"url",
+		     "label":"Image Url"			
+		    },
+			{
+			"type":"text",
+			"id":"title",
+		     "label":"Add Title"				
+		    },
+		   {
+			"type":"text",
+			"id":"buttontext",
+		    "label":"Button Text",
+			"default":"Shop Collection"
+		    }	
+		 ]
+	   },
+	  {
+			"name":"Lookbook 2",
+			"type":"lookbook2",
+		 	"settings":[
+			{
+			"type":"image_picker",
+			"id":"image",
+		     "label":"Add Image"				
+		    },
+			{
+			"type":"text",
+			"id":"url",
+		     "label":"Image Url"			
+		    },
+			{
+			"type":"text",
+			"id":"title",
+		     "label":"Add Title"				
+		    },	
+			{
+			"type":"text",
+			"id":"buttontext",
+		    "label":"Button Text",
+			"default":"Shop Collection"
+		    }	
+		 ]
+	   }
+     ]	
+  }
+{% endschema %} 

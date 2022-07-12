@@ -1,0 +1,17 @@
+<div class="sidebar_widget">
+	<div class="widget-title">
+		<h3>Categories</h3>
+	</div>
+	<div class="widget-content">
+		<ul class="sidebar_categories">
+			{% for collection in collections limit:30 %}		
+			{% assign collection_box = forloop.index | minus:1 %}
+			{% assign delay_time = 200 | times : collection_box %}
+			<li>
+				<a href="{{ collection.url }}">{{ collection.title }} <span class="collections-count">[ {{ 'collections.general.items_with_count' | t: count: collection.all_products_count }} ]</span> </a>
+			</li>
+			{% assign index = index | plus: 1 %}			
+			{% endfor %}
+		</ul>
+	</div>
+</div>

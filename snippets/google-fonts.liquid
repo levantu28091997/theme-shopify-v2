@@ -1,0 +1,16 @@
+{% if settings.type_base_family contains 'Google' %}
+  {%- assign type_base_parts = settings.type_base_family | split: '_' -%}
+  {% capture baseGoogleUrl %}{{ type_base_parts[1] }}:300,400,600,700{% endcapture %}
+  {{ '//fonts.googleapis.com/css?family=' | append: baseGoogleUrl | stylesheet_tag }}
+{% endif %}
+
+ {%- assign type_base_family= settings.type_base_family -%}
+ {%- assign type_base_heading = settings.type_pagetitle_headings_family -%}
+
+{% if type_base_family == type_base_heading %}
+
+{% else %}
+    {%- assign type_base_parts = settings.type_pagetitle_headings_family | split: '_' -%}
+    {% capture baseGoogleUrl %}{{ type_base_parts[1] }}:300,400,600,700{% endcapture %}
+    {{ '//fonts.googleapis.com/css?family=' | append: baseGoogleUrl | stylesheet_tag }}  
+{% endif %}
